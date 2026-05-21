@@ -9,8 +9,12 @@ app.use(express.json());
 
 // test route
 app.get('/', (req, res) => {
-    res.json({ message: 'AureLine API is running'});
+    res.json({ message: 'AureLine API is running' });
 });
+
+// upload route
+const uploadRouter = require('./src/routes/upload');
+app.use('/api', uploadRouter);
 
 // connect database
 mongoose.connect(process.env.MONGODB_URI)
