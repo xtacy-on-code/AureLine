@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
+const { highlightPDF} = require('../controllers/aiController');
 
 const storage = multer.memoryStorage();
 
@@ -20,9 +21,12 @@ const upload = multer ({
 router.post('/upload', upload.single('pdf'), async (req, res) => {
     try {
         const data = await pdfParse(req.file.buffer);
-        console.log(data);
+        const highlights = await highlightPDF(data.text);
 
-        res.json({message: 'PDF processed successfully', characters: data.text.length});
+        res.json({
+            message: 'PDF processed successfully',
+            highlights: highlights
+        });
     } catch (err) {
         res.status(500).json({error: 'PDF process failed', details: err.message});
     }
