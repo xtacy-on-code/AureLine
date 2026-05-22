@@ -4,7 +4,6 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const highlightPDF = async (text) => {
     try {
-
         const prompt = `
             You are an expert study assistant. Analyze the following text from a PDF.
             Find and extract important phrases and sentences directly from the text.

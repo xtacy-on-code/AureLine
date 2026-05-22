@@ -2,6 +2,8 @@ const router = require('express').Router();
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const { highlightPDF} = require('../controllers/aiController');
+const Document = require('../models/Document');
+const Highlight = require('../models/Highlight');
 
 const storage = multer.memoryStorage();
 
@@ -22,11 +24,28 @@ router.post('/upload', upload.single('pdf'), async (req, res) => {
     try {
         const data = await pdfParse(req.file.buffer);
         const highlights = await highlightPDF(data.text);
+        
+        // temp userid for now 
+        const pdfDocument = new Document({
+            userId: '507f1f77bcf86cd799439011', 
+            filename: req.file.originalname,
+            cloudinaryUrl: 'placeholder'
+        });
+        await pdfDocument.save();
+
+        const highlightDoc = new Highlight({
+            userId: '507f1f77bcf86cd799439011',
+            documentId: pdfDocument._id,
+            highlights: highlights.highlights
+        });
+        await highlightDoc.save();
 
         res.json({
             message: 'PDF processed successfully',
-            highlights: highlights
+            documentID: pdfDocument._id, 
+            highlights: highlightDoc.highlights
         });
+
     } catch (err) {
         res.status(500).json({error: 'PDF process failed', details: err.message});
     }
