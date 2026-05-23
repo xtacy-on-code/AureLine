@@ -52,4 +52,15 @@ router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) =>
     }
 });
 
+router.get('/upload/history', authMiddleware, async (req, res) => {
+    try {
+        const Docs = await Document.find({ userId: req.user.userId });
+        res.json({ documents: Docs });
+        
+
+    } catch (err) {
+        res.status(500).json({error: 'Failed to fetch history', details: err.message});
+    }
+});
+
 module.exports = router;
