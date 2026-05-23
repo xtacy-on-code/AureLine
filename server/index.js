@@ -16,6 +16,10 @@ app.get('/', (req, res) => {
 const uploadRouter = require('./src/routes/upload');
 app.use('/api', uploadRouter);
 
+// auth route
+const authRouter = require('./src/routes/auth');
+app.use('/api/auth', authRouter);
+
 // connect database
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MONGODB connected'))
