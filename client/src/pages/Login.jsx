@@ -67,7 +67,7 @@ function Login() {
 
                 {/* error message */}
                 { error && (
-                    <div className="vd-red-500/10 border border-red-500-20 text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
                         {error}
                     </div>
                 )}
@@ -84,7 +84,7 @@ function Login() {
                             onChange = {(e) => setEmail(e.target.value)}
                             placeholder="you@example.com"
                             required
-                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus: border-indigo-500 transition-colors"
+                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
                         />
                     </div> 
 
@@ -97,7 +97,7 @@ function Login() {
                             onChange = {(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
                             required
-                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus: border-indigo-500 transition-colors"
+                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
                         />
                     </div> 
 
