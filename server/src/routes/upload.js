@@ -52,7 +52,7 @@ router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) =>
     }
 });
 
-router.get('/upload/history', authMiddleware, async (req, res) => {
+router.get('/history', authMiddleware, async (req, res) => {
     try {
         const Docs = await Document.find({ userId: req.user.userId });
         res.json({ documents: Docs });
