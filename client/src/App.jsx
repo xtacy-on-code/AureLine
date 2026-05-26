@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Upload from './pages/Upload';
+import Viewer from './pages/Viewer';
 
 function App() {
   const { token } = useAuth();
@@ -27,6 +28,11 @@ function App() {
         <Route 
           path="/upload"
           element = {token ? <Upload /> : <Navigate to="/login" />}
+        />
+
+        <Route 
+          path="/viewer"
+          element = {token ? <Viewer /> : <Navigate to="/login" />}
         />
 
         {/* default */}

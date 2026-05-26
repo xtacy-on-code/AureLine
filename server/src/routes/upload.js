@@ -5,6 +5,7 @@ const { highlightPDF} = require('../controllers/aiController');
 const Document = require('../models/Document');
 const Highlight = require('../models/Highlight');
 const authMiddleware = require('../middleware/auth');
+const { highlightPDFDoc } = require('../controllers/pdfController');
 
 const storage = multer.memoryStorage();
 
@@ -25,6 +26,12 @@ router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) =>
     try {
         const data = await pdfParse(req.file.buffer);
         const highlights = await highlightPDF(data.text);
+
+        // draw highlights on the PDF
+        const highlightedPdfBuffer = await highlightPDFDoc(req.file.buffer, highlights.highlights);
+
+        // convert to base64 so we can send it to frontend
+        const highlightedPdfBase64 = highlightedPdfBuffer.toString('base64');
         
         // temp userid for now 
         const pdfDocument = new Document({
@@ -44,7 +51,8 @@ router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) =>
         res.json({
             message: 'PDF processed successfully',
             documentID: pdfDocument._id, 
-            highlights: highlightDoc.highlights
+            highlights: highlightDoc.highlights,
+            highlightedPDF: highlightedPdfBase64
         });
 
     } catch (err) {
@@ -62,5 +70,7 @@ router.get('/history', authMiddleware, async (req, res) => {
         res.status(500).json({error: 'Failed to fetch history', details: err.message});
     }
 });
+
+
 
 module.exports = router;

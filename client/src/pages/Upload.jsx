@@ -34,6 +34,15 @@ function Upload() {
 
             setHighlights(data.highlights);
 
+            navigate('/viewer', {
+                state: {
+                    highlightedPDF: data.highlightedPDF,
+                    highlights: data.highlights,
+                    
+                }
+            })
+            
+
         } catch (err) {
             setError('An error occurred while uploading the file');
         
