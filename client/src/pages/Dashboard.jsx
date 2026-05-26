@@ -45,7 +45,7 @@ function Dashboard() {
             {/* navbar */}
             <nav className="border-b border-[#222222] px-6 py-4 flex items-center justify-between">
                 {/* logo */}
-                <h1 className="text-white font-bold text-lg">✦ AureLine</h1>
+                <h1 className="text-white font-bold text-xl">✦ AureLine</h1>
 
                 {/* logout button */}
                 <button onClick={handleLogout} className="text-[#888888] hover:text-white transition-colors">
