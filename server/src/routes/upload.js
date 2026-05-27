@@ -27,6 +27,8 @@ router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) =>
         const data = await pdfParse(req.file.buffer);
         const highlights = await highlightPDF(data.text);
 
+        console.log('AI HIGHLIGHTS:', JSON.stringify(highlights, null, 2));
+
         // draw highlights on the PDF
         const highlightedPdfBuffer = await highlightPDFDoc(req.file.buffer, highlights.highlights);
 
@@ -56,6 +58,7 @@ router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) =>
         });
 
     } catch (err) {
+        console.log('FULL ERROR:', err);
         res.status(500).json({error: 'PDF process failed', details: err.message});
     }
 });
