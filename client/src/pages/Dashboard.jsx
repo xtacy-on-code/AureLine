@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import API_URL from '../config';
 
 function Dashboard() {
     const [documents, setDocuments] = useState([]);
@@ -13,7 +14,7 @@ function Dashboard() {
     useEffect(() => {
         const fetchDocuments = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/history', {
+                const res = await fetch(`${API_URL}/api/history`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -106,9 +107,9 @@ function Dashboard() {
                                     </div>
 
                                     {/* view button */}
-                                    <span className="text-indigo-400 text-xs hover:text-indigo-300">
+                                    {/* <span className="text-indigo-400 text-xs hover:text-indigo-300" onClick={() => navigate(`/viewer/${doc._id}`)}>
                                         View →
-                                    </span>
+                                    </span> */}
                                 </div>
                             ))}
                         </div>
