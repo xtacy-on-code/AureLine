@@ -14,7 +14,7 @@ AureLine is a full-stack web application that lets users upload PDF documents an
 - 🔵 **Key Concepts** — main ideas and topics
 - 🟢 **Important Points** — critical information to remember
 
-The highlights are drawn directly onto the PDF and users can download the highlighted version.
+Key Feature: The highlights are drawn directly onto the PDF and users can download the highlighted version.
 
 ---
 
