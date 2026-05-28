@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import API_URL from '../config';
 
 function Upload() {
     const [file, setFile] = useState(null);
@@ -20,7 +21,7 @@ function Upload() {
             const formData = new FormData();
             formData.append('pdf', file);
 
-            const res = await fetch('http://localhost:5000/api/upload', {
+            const res = await fetch(`${API_URL}/api/upload`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData

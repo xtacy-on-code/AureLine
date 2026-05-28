@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import API_URL from '../config';
 
 function Signup() {
     // state for form inputs
@@ -30,7 +31,7 @@ function Signup() {
 
         try {
         // call backend API to signup
-        const res = await fetch('http://localhost:5000/api/auth/signup', {
+        const res = await fetch(`${API_URL}/api/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password })
