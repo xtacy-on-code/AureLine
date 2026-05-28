@@ -27,17 +27,34 @@ function Viewer() {
         return URL.createObjectURL(blob);
     });
 
+    const handleDownload = () => {
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = 'highlighted.pdf';
+        link.click();
+    }
+
     return (
         <div className="min-h-screen bg-[#0a0a0a]">
             {/* navbar */}
             <nav className="border-b border-[#222222] px-6 py-4 flex items-center justify-between">
                 <h1 className="text-white font-bold text-lg">✦ AureLine</h1>
+
+                <div className = "flex items-center gap-4">
+                    <button
+                    onClick={handleDownload}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+                >
+                    ⬇ Download PDF
+                </button>
                 <button
                     onClick={() => navigate('/upload')}
-                    className="text-[#888888] hover:text-white text-sm transition-colors"
+                    className="flex items-center justify-center border border-[#333333] hover:border-[#555555] text-[#888888] hover:text-white text-sm px-4 py-2 rounded-lg h-9 font-bold transition-colors "
                 >
                     ← Back
                 </button>
+                </div>
+                
             </nav>
 
             {/* PDF viewer */}
