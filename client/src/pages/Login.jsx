@@ -2,130 +2,120 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import API_URL from '../config';
+import GrainBg from '../components/GrainBg';
 
 function Login() {
-  // state for form inputs
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
-  const navigate = useNavigate();
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    // prevent default form submission
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-        // call backend API to login
-        const res = await fetch(`${API_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        })
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            // backend returned an error
-            setError(data.error || 'Login failed');
-            return;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+            const res = await fetch(`${API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setError(data.error || 'Login failed');
+                return;
+            }
+            login(data.token);
+            navigate('/dashboard');
+        } catch (err) {
+            setError('Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
         }
+    };
 
-        // save token to context and localStorage
-        login(data.token);
+    return (
+        <div className="min-h-screen bg-[#09090f] flex items-center justify-center px-4 relative">
+            <GrainBg />
 
-        //redirect to dashboard
-        navigate('/dashboard');
+            <div className="w-full max-w-sm relative z-10">
+                {/* Logo */}
+                <div className="text-center mb-8">
+                    <span className="text-2xl font-semibold text-white tracking-tight">
+                        ✦ Aure<span className="text-indigo-400">Line</span>
+                    </span>
+                </div>
 
-    } catch (err) {
-        setError('Something went wrong. PLease try again.');
+                {/* Card */}
+                <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-8">
+                    <h2 className="text-lg font-semibold text-white mb-1 tracking-tight">Welcome back</h2>
+                    <p className="text-white/40 text-sm mb-6">Sign in to your account</p>
 
-    } finally {
-        // always runs no matter success or error
-        setLoading(false);
-    }
-  }
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl px-4 py-3 mb-5">
+                            {error}
+                        </div>
+                    )}
 
-  return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-            
-            {/* logo */}
-            <h1 className="text-2xl font-bold text-white text-center mb-8">
-                ✦ AureLine
-            </h1>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="text-xs text-white/40 block mb-1.5 font-medium uppercase tracking-wider">Email</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="you@example.com"
+                                required
+                                className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500/60 transition-colors placeholder:text-white/20"
+                            />
+                        </div>
 
-            {/* card */}
-            <div className="bg-[#111111] border border-[#222222] rounded-2xl p-8" >
-                
-                {/* heading */} 
-                <h2 className="text-xl font-semibold text-white mb-1">Welcome back</h2>
-                <p className="text-[#888888] text-sm mb-6">Sign in to your account.</p>
+                        <div>
+                            <label className="text-xs text-white/40 block mb-1.5 font-medium uppercase tracking-wider">Password</label>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                    className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500/60 transition-colors placeholder:text-white/20 pr-16"
+                                />
+                                {password && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 text-xs transition-colors"
+                                    >
+                                        {showPassword ? 'Hide' : 'Show'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
 
-                {/* error message */}
-                { error && (
-                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
-                        {error}
-                    </div>
-                )}
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-xl py-2.5 text-sm transition-colors mt-2"
+                        >
+                            {loading ? 'Signing in...' : 'Sign in'}
+                        </button>
+                    </form>
 
-                {/* form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
-
-                    {/* email */}
-                    <div>
-                        <label className="text-sm text-[#888888] block mb-1">Email</label>
-                        <input 
-                            type = "email"
-                            value = {email}
-                            onChange = {(e) => setEmail(e.target.value)}
-                            placeholder="you@example.com"
-                            required
-                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                        />
-                    </div> 
-
-                    {/* password */}
-                    <div>
-                        <label className="text-sm text-[#888888] block mb-1">Password</label>
-                        <input 
-                            type = "password"
-                            value = {password}
-                            onChange = {(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            required
-                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                        />
-                    </div> 
-
-                    {/* submit button */}
-                    <button
-                        type = "submit"
-                        disabled={loading}
-                        className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg py-2.5 text-sm transition-colors mt-2"
-
-                    >
-                        {loading ? 'Logging in...' : 'Login'}
-                    </button>
-                </form>
-
-                {/* signup link */}
-                <p className = "text-[#888888] text-sm text-center mt-6" >
-                    Don't have an account?{' '}
-                    <Link to="/signup" className="text-indigo-400 hover:text-indigo-300">
-                        Sign up
-                    </Link>
-                </p>
-
+                    <p className="text-white/30 text-sm text-center mt-6">
+                        No account?{' '}
+                        <Link to="/signup" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                            Sign up
+                        </Link>
+                    </p>
+                </div>
             </div>
-
         </div>
-    </div>
-  )
+    );
 }
 
-export default Login
+export default Login;

@@ -1,185 +1,152 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import API_URL from '../config';
+import GrainBg from '../components/GrainBg';
 
 function Signup() {
-    // state for form inputs
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [showPass, setShowPass] = useState(false);
-    const [showConfirmPass, setShowConfirmPass] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    
+
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-
         e.preventDefault();
         if (password !== confirmPassword) {
             setError('Passwords do not match');
-            setLoading(false);
             return;
         }
         setError('');
         setLoading(true);
-
-
-
         try {
-        // call backend API to signup
-        const res = await fetch(`${API_URL}/api/auth/signup`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password })
-        })
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            // backend returned an error
-            setError(data.error || 'Signup failed');
-            return;
-        }
-
-        //redirect to dashboard
-        navigate('/login');
-
+            const res = await fetch(`${API_URL}/api/auth/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setError(data.error || 'Signup failed');
+                return;
+            }
+            navigate('/login');
         } catch (err) {
-            setError('Something went wrong. PLease try again.');
-
+            setError('Something went wrong. Please try again.');
         } finally {
-            // always runs no matter success or error
             setLoading(false);
         }
-    }
+    };
 
     return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-            
-            {/* logo */}
-            <h1 className="text-2xl font-bold text-white text-center mb-8">
-                ✦ AureLine
-            </h1>
+        <div className="min-h-screen bg-[#09090f] flex items-center justify-center px-4 relative">
+            <GrainBg />
 
-            {/* card */}
-            <div className="bg-[#111111] border border-[#222222] rounded-2xl p-8" >
-                
-                {/* heading */} 
-                <h2 className="text-xl font-semibold text-white mb-1">Create an account</h2>
-                <p className="text-[#888888] text-sm mb-6">Sign up to start highlighting smarter.</p>
+            <div className="w-full max-w-sm relative z-10">
+                {/* Logo */}
+                <div className="text-center mb-8">
+                    <span className="text-2xl font-semibold text-white tracking-tight">
+                        ✦ Aure<span className="text-indigo-400">Line</span>
+                    </span>
+                </div>
 
-                {/* error message */}
-                { error && (
-                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
-                        {error}
-                    </div>
-                )}
+                {/* Card */}
+                <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-8">
+                    <h2 className="text-lg font-semibold text-white mb-1 tracking-tight">Create an account</h2>
+                    <p className="text-white/40 text-sm mb-6">Start highlighting smarter</p>
 
-                {/* form */}
-                <form onSubmit={handleSubmit} className="space-y-4">
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl px-4 py-3 mb-5">
+                            {error}
+                        </div>
+                    )}
 
-                    {/* username */}
-                    <div>
-                        <label className="text-sm text-[#888888] block mb-1">User Name</label>
-                        <input 
-                            type = "text"
-                            value = {name}
-                            onChange = {(e) => setName(e.target.value)}
-                            placeholder="your name goes here..."
-                            required
-                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                        />
-                    </div> 
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="text-xs text-white/40 block mb-1.5 font-medium uppercase tracking-wider">Name</label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Vedant Zala"
+                                required
+                                className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500/60 transition-colors placeholder:text-white/20"
+                            />
+                        </div>
 
-                    {/* email */}
-                    <div>
-                        <label className="text-sm text-[#888888] block mb-1">Email</label>
-                        <input 
-                            type = "email"
-                            value = {email}
-                            onChange = {(e) => setEmail(e.target.value)}
-                            placeholder="you@example.com"
-                            required
-                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                        />
-                    </div> 
+                        <div>
+                            <label className="text-xs text-white/40 block mb-1.5 font-medium uppercase tracking-wider">Email</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="you@example.com"
+                                required
+                                className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500/60 transition-colors placeholder:text-white/20"
+                            />
+                        </div>
 
-                    {/* password */}
-                    <div className="relative">
-                        <label className="text-sm text-[#888888] block mb-1">Password</label>
-                        <input 
-                            type = {showPass ? "text" : "password"}
-                            value = {password}
-                            onChange = {(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            required
-                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                        />
+                        <div>
+                            <label className="text-xs text-white/40 block mb-1.5 font-medium uppercase tracking-wider">Password</label>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                    className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500/60 transition-colors placeholder:text-white/20 pr-16"
+                                />
+                                {password && (
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 text-xs transition-colors">
+                                        {showPassword ? 'Hide' : 'Show'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
 
-                        {/* toggle button */}
-                        {password && (
-                            <button 
-                            type="button"
-                            onClick = {() => setShowPass(!showPass)}
-                            className="absolute right-3 top-9 text-[#888888] hover:text-white text-xs"
-                            > 
-                                {showPass ? 'Hide' : 'Show'}
-                            </button>
-                        )}
-                        
-                    </div> 
+                        <div>
+                            <label className="text-xs text-white/40 block mb-1.5 font-medium uppercase tracking-wider">Confirm Password</label>
+                            <div className="relative">
+                                <input
+                                    type={showConfirm ? 'text' : 'password'}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                    className="w-full bg-white/[0.03] border border-white/[0.08] text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500/60 transition-colors placeholder:text-white/20 pr-16"
+                                />
+                                {confirmPassword && (
+                                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 text-xs transition-colors">
+                                        {showConfirm ? 'Hide' : 'Show'}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
 
-                    {/* confirm password */}
-                    <div className="relative">
-                        <label className="text-sm text-[#888888] block mb-1">Confirm Password</label>
-                        <input 
-                            type = {showConfirmPass ? "text" : "password"}
-                            value = {confirmPassword}
-                            onChange = {(e) => setConfirmPassword(e.target.value)}
-                            placeholder="••••••••"
-                            required
-                            className="w-full bg-[#0a0a0a] border border-[#222222] text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                        />
-                        {confirmPassword && (
-                            <button 
-                                type="button"
-                                onClick = {() => setShowConfirmPass(!showConfirmPass)}
-                                className="absolute right-3 top-9 text-[#888888] hover:text-white text-xs"
-                            > 
-                                {showConfirmPass ? 'Hide' : 'Show'}
-                            </button>
-                        )}
-                    </div> 
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-xl py-2.5 text-sm transition-colors mt-2"
+                        >
+                            {loading ? 'Creating account...' : 'Create account'}
+                        </button>
+                    </form>
 
-                    {/* submit button */}
-                    <button
-                        type = "submit"
-                        disabled={loading}
-                        className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg py-2.5 text-sm transition-colors mt-2"
-
-                    >
-                        {loading ? 'Signing up...' : 'Sign Up'}
-                    </button>
-                </form>
-
-                {/* signup link */}
-                <p className = "text-[#888888] text-sm text-center mt-6" >
-                    Already have an account?{' '}
-                    <Link to="/login" className="text-indigo-400 hover:text-indigo-300">
-                        Log in
-                    </Link>
-                </p>
-
+                    <p className="text-white/30 text-sm text-center mt-6">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                            Sign in
+                        </Link>
+                    </p>
+                </div>
             </div>
-
         </div>
-    </div>
-  )
+    );
 }
 
-export default Signup
+export default Signup;
