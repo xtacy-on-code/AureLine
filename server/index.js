@@ -4,6 +4,8 @@ const cors = require('cors');
 require('dotenv').config(); 
 
 const app = express();
+// behind Vercel's proxy, so req.ip is the real client for rate limiting
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 

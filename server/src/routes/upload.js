@@ -40,8 +40,24 @@ const acceptPdf = (req, res, next) => {
     });
 };
 
+// each upload costs AI tokens, so cap uploads per user per day
+const DAILY_UPLOAD_LIMIT = 20;
+
+const checkDailyLimit = async (req, res, next) => {
+    try {
+        const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const count = await Document.countDocuments({ userId: req.user.userId, createdAt: { $gte: since } });
+        if (count >= DAILY_UPLOAD_LIMIT) {
+            return res.status(429).json({ error: `You can highlight up to ${DAILY_UPLOAD_LIMIT} PDFs a day. Please try again tomorrow.` });
+        }
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
+
 // POST route to handle PDF upload and processing
-router.post('/upload', authMiddleware, acceptPdf, async (req, res) => {
+router.post('/upload', authMiddleware, checkDailyLimit, acceptPdf, async (req, res) => {
     const pdfDocument = new Document({
         userId: req.user.userId,
         filename: req.file.originalname
