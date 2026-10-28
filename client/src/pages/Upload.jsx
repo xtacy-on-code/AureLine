@@ -1,195 +1,205 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/auth';
-import API_URL from '../config';
-import GrainBg from '../components/GrainBg';
+import { ThinkingOrb } from 'thinking-orbs';
+import { ArrowLeft, Check, FilePdf, UploadSimple, X } from '@phosphor-icons/react';
+import { useApi } from '../hooks/useApi';
+import { formatBytes } from '../lib/format';
+import AppBar from '../components/AppBar';
+import Button from '../components/Button';
+import FormError from '../components/FormError';
+
+const MAX_BYTES = 4 * 1024 * 1024;
+
+// the server doesn't stream progress, so stages advance on a rough clock
+const STAGES = [
+    { label: 'Reading every page', orb: 'searching', after: 0 },
+    { label: 'Picking what matters', orb: 'solving', after: 2500 },
+    { label: 'Marking the exact words', orb: 'composing', after: 6000 },
+];
+
+const checkFile = (file) => {
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if (!isPdf) return 'That is not a PDF. Please choose a .pdf file.';
+    if (file.size > MAX_BYTES) return `This PDF is ${formatBytes(file.size)}. Please upload a file under 4 MB.`;
+    return '';
+};
+
+function Processing({ file }) {
+    const [stage, setStage] = useState(0);
+
+    useEffect(() => {
+        const timers = STAGES.slice(1).map((s, i) => setTimeout(() => setStage(i + 1), s.after));
+        return () => timers.forEach(clearTimeout);
+    }, []);
+
+    return (
+        <div className="rise-in rounded-[var(--radius-sheet)] border border-rule bg-paper-raised px-6 py-10 shadow-[var(--shadow-sheet)] sm:px-10 sm:py-12">
+            <div className="flex items-center gap-5">
+                <ThinkingOrb state={STAGES[stage].orb} size={64} theme="light" aria-hidden="true" />
+                <div className="min-w-0">
+                    <p className="text-lg font-medium text-ink" role="status">{STAGES[stage].label}…</p>
+                    <p className="mt-1 truncate font-mono text-sm text-ink-faint">{file.name}</p>
+                </div>
+            </div>
+
+            <ol className="mt-9 space-y-3.5 border-t border-rule pt-7">
+                {STAGES.map((s, i) => (
+                    <li key={s.label} className={`flex items-center gap-3 text-[15px] transition-colors duration-200 ${i <= stage ? 'text-ink' : 'text-ink-faint'}`}>
+                        <span className={`grid size-6 place-items-center rounded-full border transition-colors duration-200 ${i < stage ? 'border-ink bg-ink text-paper-raised' : i === stage ? 'border-ink' : 'border-rule-strong'}`}>
+                            {i < stage ? <Check size={13} weight="bold" aria-hidden="true" /> : <span className="font-mono text-[11px]">{i + 1}</span>}
+                        </span>
+                        {s.label}
+                    </li>
+                ))}
+            </ol>
+
+            <p className="mt-8 text-sm text-ink-faint">Usually 5 to 15 seconds. Keep this tab open.</p>
+        </div>
+    );
+}
 
 function Upload() {
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [isDragging, setIsDragging] = useState(false);
-    const [highlights, setHighlights] = useState([]);
 
-    const { token, logout } = useAuth();
+    const api = useApi();
     const navigate = useNavigate();
-    
-    // Create a reference to target the hidden file picker input
     const fileInputRef = useRef(null);
+
+    const choose = (candidate) => {
+        if (!candidate) return;
+        const problem = checkFile(candidate);
+        setError(problem);
+        setFile(problem ? null : candidate);
+    };
 
     const handleDragOver = (e) => {
         e.preventDefault();
-        e.stopPropagation();
         setIsDragging(true);
     };
 
     const handleDragLeave = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+        // ignore leaving into a child element
+        if (e.currentTarget.contains(e.relatedTarget)) return;
         setIsDragging(false);
     };
 
     const handleDrop = (e) => {
         e.preventDefault();
-        e.stopPropagation();
         setIsDragging(false);
-        
-        // Target dataTransfer items directly
-        const droppedFiles = e.dataTransfer?.files;
-        if (droppedFiles && droppedFiles.length > 0) {
-            const selectedFile = droppedFiles[0];
-            
-            // Check file type or extension matching
-            if (selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf')) {
-                setFile(selectedFile);
-                setError(''); 
-            } else {
-                setError('Please drop a valid PDF file.');
-            }
-        }
+        choose(e.dataTransfer?.files?.[0]);
     };
 
-    // Trigger the file selection input click gracefully
-    const handleBoxClick = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.click();
-        }
-    };
-
-    const handleFileChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
-            setError('');
-        }
+    const clearFile = () => {
+        setFile(null);
+        setError('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const handleUpload = async (e) => {
         e.preventDefault();
+        if (!file) return;
         setError('');
         setLoading(true);
 
         try {
             const formData = new FormData();
             formData.append('pdf', file);
-
-            const res = await fetch(`${API_URL}/api/upload`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            });
-
-            // token expired or invalid, send user back to login
-            if (res.status === 401) {
-                logout();
-                navigate('/login');
-                return;
-            }
-
-            // vercel rejects request bodies over ~4.5MB before they reach the server
-            if (res.status === 413) {
-                setError('PDF is too large. Please upload a file under 4 MB.');
-                return;
-            }
-
-            const data = await res.json();
-            if (!res.ok) {
-                setError(data.error || 'Upload failed');
-                return;
-            }
-
-            setHighlights(data.highlights);
-
-            navigate('/viewer', {
-                state: {
-                    highlightedPDF: data.highlightedPDF,
-                    highlights: data.highlights,
-                }
-            });
-
+            const data = await api('/api/upload', { method: 'POST', form: formData });
+            navigate(`/doc/${data.documentId}`);
         } catch (err) {
-            setError('An error occurred while uploading the file');
-        } finally {
             setLoading(false);
+            if (err.status !== 401) setError(err.message);
         }
     };
 
     return (
-        <div className="min-h-screen bg-[#09090f] relative">
-            <GrainBg />
+        <div className="min-h-[100dvh]">
+            <AppBar>
+                <Button to="/dashboard" variant="ghost" size="sm">
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    Library
+                </Button>
+            </AppBar>
 
-            {/* Navbar */}
-            <nav className="relative z-10 border-b border-white/[0.06] px-6 py-4 flex items-center justify-between">
-                <span className="text-white font-semibold text-base tracking-tight">
-                    ✦ Aure<span className="text-indigo-400">Line</span>
-                </span>
-                <button 
-                    onClick={() => navigate('/dashboard')}
-                    className="border border-white/[0.1] hover:border-white/[0.2] active:scale-[0.98] text-white/50 hover:text-white/80 text-sm px-4 py-2 rounded-xl transition-all"
-                >
-                    ← Back to Dashboard
-                </button>
-            </nav>
+            <main className="mx-auto max-w-2xl px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-10 sm:px-6 md:pt-16">
+                <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">Highlight a PDF</h1>
+                <p className="mt-2 text-base text-ink-soft">
+                    AureLine reads every page and marks the definitions, key concepts and important points.
+                </p>
 
-            {/* Content */}
-            <div className="relative z-10 max-w-2xl mx-auto px-6 py-10">
-                <div className="mb-8">
-                    <h2 className="text-2xl font-semibold text-white tracking-tight">Upload your PDF</h2>
-                    <p className="text-white/30 text-sm mt-1">Drop a PDF and get instant AI-powered highlights</p>
-                </div>
+                <div className="mt-9">
+                    {loading ? (
+                        <Processing file={file} />
+                    ) : (
+                        <form onSubmit={handleUpload} className="flex flex-col gap-5">
+                            <FormError>{error}</FormError>
 
-                {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-xl px-4 py-3 mb-6">
-                        {error}
-                    </div>
-                )}
+                            <input
+                                type="file"
+                                accept="application/pdf,.pdf"
+                                ref={fileInputRef}
+                                onChange={(e) => choose(e.target.files?.[0])}
+                                className="sr-only"
+                                tabIndex={-1}
+                                aria-hidden="true"
+                            />
 
-                <form onSubmit={handleUpload}>
-                    {/* Hidden Native Input controlled cleanly via ref */}
-                    <input 
-                        type="file"
-                        accept=".pdf"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        className="hidden"
-                    />
+                            {file ? (
+                                <div className="rise-in flex items-center gap-4 rounded-[var(--radius-sheet)] border border-rule bg-paper-raised p-5 shadow-[var(--shadow-sheet)]">
+                                    <span className="grid size-12 shrink-0 place-items-center rounded-[var(--radius-control)] bg-mark-yellow/50">
+                                        <FilePdf size={26} className="text-ink" aria-hidden="true" />
+                                    </span>
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block truncate font-medium text-ink">{file.name}</span>
+                                        <span className="mt-0.5 block font-mono text-sm text-ink-faint tabular-nums">{formatBytes(file.size)}</span>
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={clearFile}
+                                        aria-label="Remove file"
+                                        className="pressable grid size-11 shrink-0 place-items-center rounded-[var(--radius-control)] text-ink-soft hover-fine:bg-paper-sunken hover-fine:text-ink"
+                                    >
+                                        <X size={18} aria-hidden="true" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    className={[
+                                        'group flex min-h-[18rem] w-full flex-col items-center justify-center rounded-[var(--radius-sheet)] border-[1.5px] border-dashed px-6 py-12 text-center',
+                                        'transition-[background-color,border-color] duration-200',
+                                        isDragging
+                                            ? 'border-ink bg-mark-yellow/25'
+                                            : 'border-rule-strong bg-paper-raised/60 hover-fine:border-ink hover-fine:bg-paper-raised',
+                                    ].join(' ')}
+                                >
+                                    <span className={`grid size-14 place-items-center rounded-full border border-rule bg-paper-raised transition-transform duration-200 ease-[var(--ease-out)] ${isDragging ? '-translate-y-1' : ''}`}>
+                                        <UploadSimple size={24} className="text-ink" aria-hidden="true" />
+                                    </span>
+                                    <span className="mt-5 text-lg font-medium text-ink">
+                                        {isDragging ? 'Drop it here' : 'Drop a PDF here'}
+                                    </span>
+                                    <span className="mt-1 text-base text-ink-soft">
+                                        or <span className="underline decoration-rule-strong underline-offset-4 group-hover:decoration-ink">browse your files</span>
+                                    </span>
+                                    <span className="mt-5 font-mono text-xs uppercase tracking-[0.14em] text-ink-faint">PDF · up to 4 MB</span>
+                                </button>
+                            )}
 
-                    {/* Pure structural Div container for seamless drag drop tracking */}
-                    <div 
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                        onClick={handleBoxClick}
-                        className={`block w-full bg-white/[0.01] border-2 border-dashed rounded-2xl p-16 text-center cursor-pointer transition-all duration-200 mb-5 group backdrop-blur-sm ${
-                            isDragging ? 'border-indigo-500 bg-indigo-500/[0.04] scale-[1.01]' : 'border-white/[0.08] hover:border-indigo-500/50'
-                        }`}
-                    >
-                        <div className="pointer-events-none select-none">
-                            <p className="text-4xl mb-4 opacity-80 group-hover:scale-110 transition-transform duration-200">📄</p>
-                            <p className="text-white/80 text-sm font-medium">Drop your PDF here</p>
-                            <p className="text-white/30 text-xs mt-1">or click to browse local files</p>
-                        </div>
-                    </div>
-
-                    {/* Selected file info card */}
-                    {file && (
-                        <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-xl px-4 py-3 mb-5 flex items-center gap-2">
-                            <span className="text-emerald-400 text-xs font-bold">✓</span>
-                            <p className="text-indigo-300 text-sm font-medium truncate">
-                                {file.name}
-                            </p>
-                        </div>
+                            <Button type="submit" size="lg" className="w-full sm:w-auto sm:self-end" disabled={!file}>
+                                Highlight it
+                            </Button>
+                        </form>
                     )}
-
-                    {/* Submit button */}
-                    <button
-                        type="submit"
-                        disabled={!file || loading}
-                        className="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium rounded-xl py-3 text-sm transition-all"
-                    >
-                        {loading ? 'Analyzing your PDF...' : 'Highlight my PDF'}
-                    </button>
-                </form>
-            </div>
+                </div>
+            </main>
         </div>
     );
 }
