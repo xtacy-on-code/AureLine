@@ -1,11 +1,10 @@
 const router = require('express').Router();
 const multer = require('multer');
-const pdfParse = require('pdf-parse');
 const { highlightPDF} = require('../controllers/aiController');
 const Document = require('../models/Document');
 const Highlight = require('../models/Highlight');
 const authMiddleware = require('../middleware/auth');
-const { highlightPDFDoc } = require('../controllers/pdfController');
+const { highlightPDFDoc, extractText } = require('../controllers/pdfController');
 
 const storage = multer.memoryStorage();
 
@@ -24,8 +23,8 @@ const upload = multer ({
 // POST route to handle PDF upload and processing
 router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) => {
     try {
-        const data = await pdfParse(req.file.buffer);
-        const highlights = await highlightPDF(data.text);
+        const text = await extractText(req.file.buffer);
+        const highlights = await highlightPDF(text);
 
         console.log('AI HIGHLIGHTS:', JSON.stringify(highlights, null, 2));
 

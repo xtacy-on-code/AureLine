@@ -130,4 +130,22 @@ const highlightPDFDoc = async (pdfBuffer, highlights) => {
     }
 };
 
-module.exports = { highlightPDFDoc };
+// EXTRACT TEXT (replaces pdf-parse, whose bundled pdf.js v1.10 fails on newer PDFs)
+const extractText = async (pdfBuffer) => {
+    const pdfData = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer) }).promise;
+
+    let text = '';
+    for (let pageNum = 1; pageNum <= pdfData.numPages; pageNum++) {
+        const page = await pdfData.getPage(pageNum);
+        const textContent = await page.getTextContent();
+
+        for (const item of textContent.items) {
+            text += item.str + (item.hasEOL ? '\n' : '');
+        }
+        text += '\n\n';
+    }
+
+    return text;
+};
+
+module.exports = { highlightPDFDoc, extractText };
