@@ -147,7 +147,7 @@ function SkeletonRows() {
 
 function EmptyLibrary() {
     return (
-        <div className="rise-in grid items-center gap-10 border-y border-rule py-16 md:grid-cols-[1fr_auto] md:py-20">
+        <div className="rise-in sketch grid items-center gap-10 bg-paper-raised px-6 py-14 shadow-[var(--shadow-sheet)] sm:px-10 md:grid-cols-[1fr_auto] md:py-16">
             <div>
                 <h2 className="font-display text-3xl font-extrabold tracking-[-0.04em] text-ink">Nothing highlighted yet</h2>
                 <p className="mt-2 max-w-md text-base text-ink-soft">
@@ -270,7 +270,7 @@ function Dashboard() {
                     ) : documents.length === 0 ? (
                         !error && <EmptyLibrary />
                     ) : (
-                        <>
+                        <div className="rise-in sketch bg-paper-raised px-5 pb-2 pt-5 shadow-[var(--shadow-sheet)] sm:px-7">
                             <div className={`${ROW_GRID} hidden border-b border-rule pb-3 font-hand text-[15px] uppercase tracking-[0.05em] text-ink-faint md:grid`}>
                                 <span>Name</span>
                                 <span>Pages</span>
@@ -283,7 +283,7 @@ function Dashboard() {
                                     <DocumentRow key={doc._id} doc={doc} index={i} onDelete={handleDelete} />
                                 ))}
                             </ul>
-                        </>
+                        </div>
                     )}
                 </div>
             </main>
