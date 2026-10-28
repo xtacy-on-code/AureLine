@@ -1,47 +1,46 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/auth';
 
-// pages
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Dashboard from './pages/Dashboard';
-import Upload from './pages/Upload';
-import Viewer from './pages/Viewer';
+// pages load on demand, so the PDF viewer isn't in the first download
+const Landing = lazy(() => import('./pages/Landing'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Upload = lazy(() => import('./pages/Upload'));
+const Viewer = lazy(() => import('./pages/Viewer'));
+
+// protected routes send signed-out users to login
+function RequireAuth({ children }) {
+  const { token } = useAuth();
+  return token ? children : <Navigate to="/login" replace />;
+}
+
+// login and signup skip straight to the library when already signed in
+function GuestOnly({ children }) {
+  const { token } = useAuth();
+  return token ? <Navigate to="/dashboard" replace /> : children;
+}
 
 function App() {
-  const { token } = useAuth();
-
   return (
     <BrowserRouter>
-      <Routes>
-        {/* public routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        
-        {/* protected routes */}
-        <Route
-          path = "/dashboard"
-          element = {token ? <Dashboard/> : <Navigate to="/login" />}
-        />
+      <Suspense fallback={<div className="min-h-[100dvh]" />}>
+        <Routes>
+          {/* public routes */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
+          <Route path="/signup" element={<GuestOnly><Signup /></GuestOnly>} />
 
-        {/* upload route */}
-        <Route 
-          path="/upload"
-          element = {token ? <Upload /> : <Navigate to="/login" />}
-        />
+          {/* protected routes */}
+          <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+          <Route path="/upload" element={<RequireAuth><Upload /></RequireAuth>} />
+          <Route path="/viewer" element={<RequireAuth><Viewer /></RequireAuth>} />
 
-        <Route 
-          path="/viewer"
-          element = {token ? <Viewer /> : <Navigate to="/login" />}
-        />
-
-        {/* default */}
-        <Route 
-          path="/"
-          element = {token ? <Navigate to="/dashboard"/> : <Navigate to="/login" />}
-        />
-
-      </Routes>
+          {/* default */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }

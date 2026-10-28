@@ -13,8 +13,8 @@ const SIZES = {
     lg: 'h-13 px-7 text-base',
 };
 
-// button, or a router link when `to` is given
-function Button({ variant = 'primary', size = 'md', to, className = '', children, ...props }) {
+// button, a router link when `to` is given, or a plain link when `href` is
+function Button({ variant = 'primary', size = 'md', to, href, className = '', children, ...props }) {
     const classes = [
         'pressable inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] font-medium whitespace-nowrap select-none',
         'disabled:opacity-45 disabled:cursor-not-allowed',
@@ -25,6 +25,10 @@ function Button({ variant = 'primary', size = 'md', to, className = '', children
 
     if (to) {
         return <Link to={to} className={classes} {...props}>{children}</Link>;
+    }
+
+    if (href) {
+        return <a href={href} className={classes} {...props}>{children}</a>;
     }
 
     return (

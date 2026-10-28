@@ -48,6 +48,12 @@
     text-rendering: optimizeLegibility;
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   body {
     @apply bg-paper text-ink font-sans antialiased;
     font-feature-settings: "ss01";
@@ -109,10 +115,11 @@
 
 /* a line of text highlighted in a sheet (multi-line friendly) */
 .marker-line {
+  --marker-height: 78%;
   background-image: linear-gradient(var(--marker-color, var(--color-mark-yellow)), var(--marker-color, var(--color-mark-yellow)));
   background-repeat: no-repeat;
-  background-size: 100% 78%;
-  background-position: 0 70%;
+  background-size: 100% var(--marker-height);
+  background-position: 0 var(--marker-position, 70%);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   mix-blend-mode: multiply;
@@ -120,12 +127,21 @@
 }
 
 .marker-line[data-animate] {
-  background-size: 0% 78%;
+  background-size: 0% var(--marker-height);
   transition: background-size var(--marker-duration, 700ms) var(--ease-in-out) var(--marker-delay, 0ms);
 }
 
 .marker-line[data-animate][data-drawn="true"] {
-  background-size: 100% 78%;
+  background-size: 100% var(--marker-height);
+}
+
+/* display headlines: a fat stroke across the lower part of the letters */
+.marker-line.marker-display {
+  --marker-height: 42%;
+  --marker-position: 88%;
+  border-radius: 0.12em;
+  padding: 0 0.06em;
+  margin: 0 -0.06em;
 }
 
 .marker-line[data-tone="blue"] { --marker-color: var(--color-mark-blue); }
@@ -166,13 +182,23 @@
     clip-path: inset(0 0 0 0);
   }
   .marker-line[data-animate] {
-    background-size: 100% 78%;
+    background-size: 100% var(--marker-height);
   }
   .rise-in {
     animation: fade-in 200ms ease both;
   }
   .pressable:active:not(:disabled) {
     transform: none;
+  }
+}
+
+/* hero demo: the scanner band travels from above the page to its bottom edge */
+@keyframes scan {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
   }
 }
 
