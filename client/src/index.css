@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* hover styles only for real pointers, so taps on touch screens don't stick */
+@custom-variant hover-fine {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 /* Ink & Paper design tokens, see DESIGN.md */
 @theme {
   --color-paper: #f4efe4;
