@@ -69,16 +69,16 @@ const joinItems = (items) => {
     return segments;
 };
 
-// EXTRACT TEXT - same joining rules as the page index, so the AI quotes text we can find
+// EXTRACT TEXT - one string per page, same joining rules as the page index, so
+// the AI quotes text we can find
 const extractText = (pages) => {
-    let text = '';
-    for (const items of pages) {
+    return pages.map(items => {
+        let text = '';
         for (const { str, separator } of joinItems(items)) {
             text += separator === '-' ? str.slice(0, -1) : str + separator;
         }
-        text += '\n';
-    }
-    return text;
+        return text;
+    });
 };
 
 // NORMALIZE - lowercase letters/digits separated by single spaces, so punctuation,

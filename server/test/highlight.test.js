@@ -125,10 +125,11 @@ test('finds the right page in a long document and draws one mark per highlight',
     assert.deepStrictEqual(highlights.map(h => h.page), wanted.map((_, i) => i * 4 + 1));
 });
 
-test('extractText keeps the text of every page', async () => {
+test('extractText returns the text of every page', async () => {
     const pdf = await makePdf([['first page text'], ['second page text']]);
-    const text = extractText(await readPdf(pdf));
+    const pageTexts = extractText(await readPdf(pdf));
 
-    assert.match(text, /first page text/);
-    assert.match(text, /second page text/);
+    assert.strictEqual(pageTexts.length, 2);
+    assert.match(pageTexts[0], /first page text/);
+    assert.match(pageTexts[1], /second page text/);
 });

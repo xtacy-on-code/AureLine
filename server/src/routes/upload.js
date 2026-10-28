@@ -58,7 +58,10 @@ router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) =>
 
     } catch (err) {
         console.log('FULL ERROR:', err);
-        res.status(500).json({error: 'PDF process failed', details: err.message});
+        if (err.status === 429) {
+            return res.status(429).json({ error: err.message });
+        }
+        res.status(500).json({ error: 'PDF process failed. Please try another file.' });
     }
 });
 
