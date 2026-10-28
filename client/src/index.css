@@ -322,6 +322,17 @@
   }
 }
 
+/* landing scroll cue: the arrow bobs while the cue is showing */
+@keyframes cue-bob {
+  0%,
+  100% {
+    transform: translateY(-2px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
 /* ---------- Entrances ---------- */
 @keyframes rise-in {
   from {

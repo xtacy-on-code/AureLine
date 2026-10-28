@@ -8,13 +8,15 @@ import ScrollStory from '../components/landing/ScrollStory';
 import TryItLive from '../components/landing/TryItLive';
 import BeforeAfter from '../components/landing/BeforeAfter';
 import PageFan from '../components/landing/PageFan';
+import ScrollCue from '../components/landing/ScrollCue';
 
 function Landing() {
     const { token } = useAuth();
     const startTo = token ? '/upload' : '/signup';
 
     return (
-        <div className="min-h-[100dvh] overflow-x-clip">
+        <div className="relative min-h-[100dvh] overflow-x-clip">
+            <ScrollCue />
             <header className="pt-[env(safe-area-inset-top)]">
                 <nav className="mx-auto flex h-20 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
                     <Logo />
