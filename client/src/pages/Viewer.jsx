@@ -1,110 +1,146 @@
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Document, Page, pdfjs } from 'react-pdf';
-import GrainBg from '../components/GrainBg';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+import { useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { ArrowLeft, DownloadSimple, CaretDown } from '@phosphor-icons/react';
+import { useApi } from '../hooks/useApi';
+import { formatDate, plural } from '../lib/format';
+import AppBar from '../components/AppBar';
+import Button from '../components/Button';
+import FormError from '../components/FormError';
+import HighlightList from '../components/viewer/HighlightList';
+import PdfPages, { PageSkeleton } from '../components/viewer/PdfPages';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+const downloadName = (filename) => `${filename.replace(/\.pdf$/i, '')} (highlighted).pdf`;
+
+function DocumentDetails({ doc }) {
+    return (
+        <div>
+            <h1 className="break-words text-xl font-semibold leading-snug tracking-tight text-ink">{doc.filename}</h1>
+            <p className="mt-1.5 font-mono text-xs text-ink-faint tabular-nums">
+                {[doc.pageCount ? plural(doc.pageCount, 'page') : null, plural(doc.highlightCount || 0, 'highlight'), formatDate(doc.createdAt)]
+                    .filter(Boolean)
+                    .join(' · ')}
+            </p>
+        </div>
+    );
+}
 
 function Viewer() {
-    const { state } = useLocation();
-    const navigate = useNavigate();
+    const { id } = useParams();
+    const api = useApi();
+    const pagesRef = useRef(null);
 
-    const [numPages, setNumPages] = useState(null);
-    const [pageLoading, setPageLoading] = useState(true);
+    const [doc, setDoc] = useState(null);
+    const [highlights, setHighlights] = useState([]);
+    const [fileUrl, setFileUrl] = useState(null);
+    const [error, setError] = useState('');
 
-    const { highlightedPDF, highlights } = state || {};
+    // details and the PDF itself load in parallel
+    useEffect(() => {
+        let ignore = false;
+        let objectUrl = null;
 
-    const [fileUrl] = useState(() => {
-        if (!highlightedPDF) return null;
-        const bytes = atob(highlightedPDF);
-        const buffer = new Uint8Array(bytes.length);
+        api(`/api/documents/${id}`)
+            .then(data => {
+                if (ignore) return;
+                setDoc(data.document);
+                setHighlights(data.highlights);
+            })
+            .catch(err => {
+                if (!ignore && err.status !== 401) setError(err.status === 404 ? 'This document is not in your library.' : err.message);
+            });
 
-        for (let i = 0; i < bytes.length; i++) {
-            buffer[i] = bytes.charCodeAt(i);
-        }
+        api(`/api/documents/${id}/pdf`, { raw: true })
+            .then(res => res.blob())
+            .then(blob => {
+                objectUrl = URL.createObjectURL(blob);
+                if (ignore) {
+                    URL.revokeObjectURL(objectUrl);
+                    return;
+                }
+                setFileUrl(objectUrl);
+            })
+            .catch(err => {
+                if (!ignore && err.status !== 401 && err.status !== 404) setError(err.message);
+            });
 
-        const blob = new Blob([buffer], { type: 'application/pdf' });
-        return URL.createObjectURL(blob);
-    });
+        return () => {
+            ignore = true;
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        };
+    }, [api, id]);
 
-    const handleDownload = () => {
-        if (!fileUrl) return;
-        const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = 'highlighted.pdf';
-        link.click();
+    const handlePick = (highlight) => {
+        pagesRef.current?.goToPage(highlight.page);
     };
 
+    const download = fileUrl && doc ? (
+        <Button href={fileUrl} download={downloadName(doc.filename)} size="sm">
+            <DownloadSimple size={16} weight="bold" aria-hidden="true" />
+            <span className="hidden sm:inline">Download PDF</span>
+            <span className="sm:hidden">Download</span>
+        </Button>
+    ) : null;
+
     return (
-        <div className="min-h-screen bg-[#09090f] relative flex flex-col">
-            <GrainBg />
+        <div className="min-h-[100dvh]">
+            <AppBar wide>
+                <Button to="/dashboard" variant="ghost" size="sm">
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    Library
+                </Button>
+                {download}
+            </AppBar>
 
-            {/* Navbar */}
-            <nav className="relative z-10 border-b border-white/[0.06] px-6 py-4 flex items-center justify-between shrink-0">
-                <span className="text-white font-semibold text-base tracking-tight">
-                    ✦ Aure<span className="text-indigo-400">Line</span>
-                </span>
+            {error ? (
+                <main className="mx-auto max-w-xl px-4 py-16 sm:px-6">
+                    <FormError>{error}</FormError>
+                    <Button to="/dashboard" variant="secondary" className="mt-6">Back to library</Button>
+                </main>
+            ) : (
+                <main className="mx-auto grid max-w-[1400px] gap-8 px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-10 lg:pt-8">
+                    {/* highlights: collapsible above the pages on small screens, sticky sidebar on large */}
+                    <aside className="lg:order-2">
+                        <div className="lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-1">
+                            {doc ? (
+                                <>
+                                    <DocumentDetails doc={doc} />
 
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={handleDownload}
-                        disabled={!fileUrl}
-                        className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
-                    >
-                        ⬇ Download PDF
-                    </button>
-                    <button
-                        onClick={() => navigate('/upload')}
-                        className="border border-white/[0.1] hover:border-white/[0.2] text-white/50 hover:text-white/80 text-sm px-4 py-2 rounded-xl transition-colors font-medium"
-                    >
-                        ← Back
-                    </button>
-                </div>
-            </nav>
+                                    <details className="group mt-6 lg:hidden">
+                                        <summary className="flex h-12 cursor-pointer list-none items-center justify-between rounded-[var(--radius-control)] border border-rule-strong bg-paper-raised px-4 text-[15px] font-medium text-ink [&::-webkit-details-marker]:hidden">
+                                            {plural(highlights.length, 'highlight')}
+                                            <CaretDown size={16} className="transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
+                                        </summary>
+                                        <div className="pt-5">
+                                            <HighlightList highlights={highlights} onPick={handlePick} />
+                                        </div>
+                                    </details>
 
-            {/* PDF View Workspace */}
-            <div className="relative z-10 flex-1 overflow-y-auto p-6 flex flex-col items-center custom-scrollbar">
-                {pageLoading && fileUrl && (
-                    <div className="text-center my-auto space-y-3">
-                        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                        <p className="text-white/40 text-sm">Rendering highlights...</p>
-                    </div>
-                )}
-
-                {!fileUrl && (
-                    <div className="text-center my-auto">
-                        <p className="text-red-400 text-sm">No PDF data found. Please try re-uploading.</p>
-                    </div>
-                )}
-
-                {fileUrl && (
-                    <div className="w-full max-w-2xl bg-white/[0.01] border border-white/[0.06] rounded-2xl p-4 md:p-8 flex justify-center backdrop-blur-sm shadow-2xl">
-                        <Document
-                            file={fileUrl}
-                            onLoadSuccess={({ numPages }) => {
-                                setNumPages(numPages);
-                                setPageLoading(false);
-                            }}
-                            onLoadError={(err) => {
-                                console.error('PDF load error:', err);
-                                setPageLoading(false);
-                            }}
-                        >
-                            {Array.from({ length: numPages || 0 }, (_, i) => (
-                                <div key={i + 1} className="mb-6 last:mb-0 shadow-lg rounded-md overflow-hidden border border-white/[0.04]">
-                                    <Page
-                                        pageNumber={i + 1}
-                                        width={Math.min(window.innerWidth - 64, 600)}
-                                        renderProvider={false}
-                                    />
+                                    <div className="mt-7 hidden lg:block">
+                                        <HighlightList highlights={highlights} onPick={handlePick} />
+                                    </div>
+                                </>
+                            ) : (
+                                <div aria-hidden="true" className="space-y-3">
+                                    <div className="h-6 w-3/4 rounded bg-paper-sunken animate-pulse" />
+                                    <div className="h-3 w-1/2 rounded-full bg-paper-sunken" />
                                 </div>
-                            ))}
-                        </Document>
-                    </div>
-                )}
-            </div>
+                            )}
+                        </div>
+                    </aside>
+
+                    <section aria-label="Highlighted PDF" className="min-w-0 rounded-[var(--radius-sheet)] bg-paper-sunken/70 px-3 py-6 sm:px-8 sm:py-10 lg:order-1">
+                        {fileUrl ? (
+                            <PdfPages
+                                ref={pagesRef}
+                                file={fileUrl}
+                                onError={() => setError("This PDF couldn't be displayed. Try downloading it instead.")}
+                            />
+                        ) : (
+                            <PageSkeleton />
+                        )}
+                    </section>
+                </main>
+            )}
         </div>
     );
 }

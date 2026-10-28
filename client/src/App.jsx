@@ -35,7 +35,9 @@ function App() {
           {/* protected routes */}
           <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
           <Route path="/upload" element={<RequireAuth><Upload /></RequireAuth>} />
-          <Route path="/viewer" element={<RequireAuth><Viewer /></RequireAuth>} />
+          <Route path="/doc/:id" element={<RequireAuth><Viewer /></RequireAuth>} />
+          {/* old viewer url, documents now have their own address */}
+          <Route path="/viewer" element={<Navigate to="/dashboard" replace />} />
 
           {/* default */}
           <Route path="*" element={<Navigate to="/" replace />} />
