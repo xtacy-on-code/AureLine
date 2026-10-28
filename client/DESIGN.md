@@ -1,90 +1,92 @@
-# AureLine — Ink & Paper
+# AureLine — Sketchbook
 
-AureLine highlights PDFs. The interface should feel like a good desk: warm paper,
-black ink, and three highlighter pens. Everything else stays quiet so the marks
-are the loudest thing on screen.
+AureLine highlights PDFs. The interface looks like a study sketchbook: graph
+paper, ink drawn by hand, pastel highlighters, and the occasional comic panel,
+speech bubble or sound effect. It should feel friendly and a little playful,
+never messy: the wobble is in the lines, not in the layout.
 
 ## Principles
 
-1. **The marker is the brand.** Highlighter strokes are the one decorative
-   element. They mean something (definition / concept / important point), so
-   never use the three marker colours for anything else.
-2. **Paper, not glass.** Flat warm surfaces, 1px rules, tinted soft shadows only
-   where something sits above the page. No blur panels, no glows, no gradients.
-3. **Editorial on the outside, a tool on the inside.** The landing page and auth
-   screens use the serif display face; the working app (library, upload, viewer)
-   is sans-only and denser.
+1. **The marker is the brand.** Yellow, blue and green highlighter strokes mean
+   definition / key concept / important point. Don't use them for anything else.
+   Pink is the one extra accent, for bursts and badges.
+2. **Ink outlines, hand-drawn.** Objects that sit on the page (sheets, panels,
+   buttons, inputs) get a 2.5px ink outline drawn with a slight SVG wobble and a
+   hard offset shadow, like a comic panel. Dividers inside them stay thin and
+   straight so dense content still reads cleanly.
+3. **Comic on the outside, a tool on the inside.** The landing page tells its
+   story in panels with captions, bubbles and sound effects. The app (library,
+   upload, viewer) keeps the outlines and type but drops the bubbles and SFX.
 
 ## Colour
 
-All colours are tokens in `src/index.css` (`@theme`). Light theme only — the
-product is literally paper.
+Tokens live in `src/index.css` (`@theme`). Light only — it's paper.
 
 | Token | Hex | Use |
 |---|---|---|
-| `paper` | `#F4EFE4` | Page background |
-| `paper-raised` | `#FBF8F1` | Sheets, panels, inputs |
-| `paper-sunken` | `#EBE4D5` | Wells, hovered rows, skeletons |
-| `rule` | `#DCD3C1` | 1px dividers and borders |
-| `rule-strong` | `#C4B9A3` | Input borders, dashed drop zone |
-| `ink` | `#1D1B17` | Primary text, primary buttons |
-| `ink-soft` | `#4F4A41` | Secondary text |
-| `ink-faint` | `#857D70` | Tertiary text, captions (AA on paper at 14px+) |
-| `danger` | `#A63D2A` | Errors, destructive actions |
+| `paper` | `#FDFCF7` | Page background (with a 22px graph grid) |
+| `paper-raised` | `#FFFFFF` | Panels, sheets, inputs |
+| `paper-sunken` | `#F3F1EA` | Wells, hovered rows, skeletons |
+| `grid` | `#E8ECF5` | Graph-paper lines |
+| `rule` | `#E3E1D8` | Thin straight dividers inside panels |
+| `rule-strong` | `#C9CBD2` | Dashed drop zone, disabled outlines |
+| `ink` | `#22252B` | Text, outlines, shadows, primary buttons |
+| `ink-soft` | `#50545C` | Secondary text |
+| `ink-faint` | `#6B6F78` | Captions, labels (AA on white) |
+| `danger` | `#C2334D` | Errors, delete |
+| `pop` | `#FF8FAB` | Bursts, badges, the one extra accent |
 
-### Markers (semantic — the only accents)
+### Markers
 
 | Token | Hex | Meaning |
 |---|---|---|
-| `mark-yellow` | `#F5DC4E` | Definition |
-| `mark-blue` | `#9CC6EE` | Key concept |
-| `mark-green` | `#A3DE95` | Important point |
+| `mark-yellow` | `#FFE066` | Definition |
+| `mark-blue` | `#A5D8FF` | Key concept |
+| `mark-green` | `#B2F2BB` | Important point |
 
-Markers are drawn as backgrounds behind ink text with `mix-blend-mode: multiply`
-so they read like real highlighter on paper. Text on a marker is always `ink`.
+Text on a marker is always `ink`.
 
 ## Type
 
 | Role | Face | Notes |
 |---|---|---|
-| Display | Instrument Serif (400 / italic) | Landing + auth headlines only. `tracking-tight`, `leading-[0.95]`. |
-| UI / body | Geist Variable | Everything else. Body 16px, small 14px, captions 13px. |
-| Numbers / labels | Geist Mono Variable | Counts, dates, page numbers, step numbers. `tabular-nums`. |
+| Display | Bricolage Grotesque (800) | Headlines, wordmark, panel titles. `tracking-[-0.04em]`, tight leading. |
+| UI / body | Figtree | Everything else. Body 16px, small 14px. Numbers `tabular-nums`. |
+| Hand | Gaegu (700) | Captions, bubbles, sound effects, labels and small notes. Never for body copy or anything over two lines. |
 
 Dates are `DD MMM YYYY` (`28 Oct 2026`).
 
-## Space, shape, depth
+## Shape and depth
 
-- 4px base grid. Section rhythm on the landing page: 96–160px. App: 24–40px.
-- Radii: controls `10px`, sheets/panels `16px`, pills `999px`.
-- Shadow (only for things above the page): `--shadow-sheet`
-  (`0 1px 0 #1d1b170a, 0 18px 40px -22px #3c2d1440`).
-- Fixed paper grain overlay at 5% opacity, `pointer-events: none`, never on a
-  scrolling element.
+- `sketch` utility: outline + wobble on a `::before` layer (so text inside is
+  never distorted), irregular radius `--radius-sketch`, and
+  `--shadow-sketch` (`4px 5px 0 ink`). Smaller controls use `--shadow-sketch-sm`.
+- Thin straight 1px `rule` lines for lists and tables inside a panel.
+- Section rhythm on the landing page: 96–140px. App: 24–40px.
 
 ## Motion
 
-Follows Emil Kowalski's rules (see frontend-craft).
+Emil Kowalski's rules (see frontend-craft).
 
-- Ease: `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)` for enters,
-  `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)` for on-screen moves.
-- UI transitions ≤ 250ms; only `transform`, `opacity`, `clip-path`.
-- Buttons press to `scale(0.97)`.
-- **Marker sweep**: a highlight reveals left→right with `clip-path: inset()`
-  over 600–900ms. Used on landing headlines, the hero demo and when jumping
-  to a highlight in the viewer. Nowhere else.
-- Lists stagger 40ms per item, max 8 items.
-- Hover effects only under `(hover: hover) and (pointer: fine)`.
-- `prefers-reduced-motion`: markers appear fully drawn, no movement, opacity
-  fades only.
-- AI waits over 2s use a Thinking Orb (`searching` while reading the PDF).
+- Ease: `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)`;
+  `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)`;
+  `--ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1)` for sound effects and bursts only.
+- Buttons press *into* their shadow: `translate(2px, 2px)` and a smaller
+  shadow, 120ms. No scale.
+- Marker sweep: highlight reveals left to right, 500–900ms. Used for headlines,
+  demos and jumping to a highlight.
+- SFX pop in with `--ease-pop`, once, never on a loop.
+- Scroll story and fanning pages run off IntersectionObserver, no scroll
+  listeners. Everything renders in its finished state under
+  `prefers-reduced-motion`.
+- AI waits over 2s use a Thinking Orb.
 
 ## Components
 
-- **Button** — `primary` ink fill / paper text; `secondary` paper-raised with
-  rule border; `ghost` text only. Height 44px (40px compact in app bars).
-- **Field** — label above, 16px input text (no iOS zoom), error below in
-  `danger`.
-- **Marker** — inline span that paints a marker behind text; `animate` sweeps it.
-- **Sheet** — `paper-raised`, rule border, `--shadow-sheet`, 16px radius.
-- **Type chip** — small marker swatch + label + mono count; filters highlights.
+- **Button** — `primary` ink fill with paper text; `secondary` white with ink
+  outline; both carry the small hard shadow. `ghost` is text only.
+- **Field** — label above, 2px ink outline, 16px text, yellow focus glow,
+  error below in `danger`.
+- **Marker** — highlighter stroke behind inline text; `animate` sweeps it in.
+- **Panel** (`sketch`) — white, wobbly ink outline, hard shadow.
+- **Bubble / Caption / Burst / SFX** — landing page only.

@@ -1,7 +1,7 @@
 import Logo from './Logo';
 import Marker from './Marker';
 
-// split screen for login/signup: form on the left, a paper quote on the right
+// split screen for login/signup: form on the left, a comic panel quote on the right
 function AuthLayout({ title, subtitle, children, footer }) {
     return (
         <div className="min-h-[100dvh] grid lg:grid-cols-[1fr_1fr]">
@@ -10,7 +10,7 @@ function AuthLayout({ title, subtitle, children, footer }) {
 
                 <main id="main" className="flex flex-1 items-center py-12">
                     <div className="rise-in mx-auto w-full max-w-sm">
-                        <h1 className="font-serif text-[2.75rem] leading-none tracking-tight text-ink">{title}</h1>
+                        <h1 className="font-display text-[2.6rem] font-extrabold leading-[0.95] tracking-[-0.045em] text-ink">{title}</h1>
                         {subtitle && <p className="mt-3 text-base text-ink-soft">{subtitle}</p>}
                         <div className="mt-9">{children}</div>
                         {footer && <p className="mt-8 text-sm text-ink-soft">{footer}</p>}
@@ -18,19 +18,19 @@ function AuthLayout({ title, subtitle, children, footer }) {
                 </main>
             </div>
 
-            <aside className="relative hidden overflow-hidden border-l border-rule bg-paper-sunken lg:flex lg:items-center lg:justify-center" aria-hidden="true">
-                <div className="rise-in w-[min(30rem,80%)] -rotate-[1.5deg] rounded-[var(--radius-sheet)] border border-rule bg-paper-raised p-12 shadow-[var(--shadow-sheet)]" style={{ '--i': 2 }}>
-                    <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink-faint">Proverb</p>
-                    <blockquote className="mt-6 font-serif text-[2.6rem] leading-[1.08] tracking-tight text-ink">
+            <aside className="relative hidden border-l-[2.5px] border-ink bg-paper-sunken/60 lg:flex lg:items-center lg:justify-center" aria-hidden="true">
+                <div className="rise-in sketch relative w-[min(30rem,80%)] -rotate-[1.2deg] bg-paper-raised p-12 shadow-[var(--shadow-sheet)]" style={{ '--i': 2 }}>
+                    <span className="absolute -top-4 left-8 -rotate-2 border-2 border-ink bg-mark-yellow px-3 py-0.5 font-hand text-lg uppercase tracking-[0.05em] text-ink">
+                        Old proverb
+                    </span>
+                    <blockquote className="font-display text-[2.4rem] font-extrabold leading-[1.02] tracking-[-0.04em] text-ink">
                         &ldquo;The{' '}
-                        <Marker line animate delay={450} duration={850} className="marker-display italic">faintest ink</Marker>{' '}
+                        <Marker line animate delay={450} duration={850} className="marker-display">faintest ink</Marker>{' '}
                         is better than the best memory.&rdquo;
                     </blockquote>
-                    <div className="mt-10 space-y-2.5">
-                        {[100, 88, 94, 58].map((w, i) => (
-                            <div key={i} className="h-2 rounded-full bg-paper-sunken" style={{ width: `${w}%` }} />
-                        ))}
-                    </div>
+                    <p className="mt-8 -rotate-1 font-hand text-2xl text-ink-soft">
+                        &larr; which is why we highlight things
+                    </p>
                 </div>
             </aside>
         </div>

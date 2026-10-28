@@ -33,12 +33,12 @@ function Processing({ file }) {
     }, []);
 
     return (
-        <div className="rise-in rounded-[var(--radius-sheet)] border border-rule bg-paper-raised px-6 py-10 shadow-[var(--shadow-sheet)] sm:px-10 sm:py-12">
+        <div className="rise-in sketch bg-paper-raised px-6 py-10 shadow-[var(--shadow-sheet)] sm:px-10 sm:py-12">
             <div className="flex items-center gap-5">
                 <ThinkingOrb state={STAGES[stage].orb} size={64} theme="light" aria-hidden="true" />
                 <div className="min-w-0">
                     <p className="text-lg font-medium text-ink" role="status">{STAGES[stage].label}…</p>
-                    <p className="mt-1 truncate font-mono text-sm text-ink-faint">{file.name}</p>
+                    <p className="mt-1 truncate text-sm text-ink-faint">{file.name}</p>
                 </div>
             </div>
 
@@ -46,7 +46,7 @@ function Processing({ file }) {
                 {STAGES.map((s, i) => (
                     <li key={s.label} className={`flex items-center gap-3 text-[15px] transition-colors duration-200 ${i <= stage ? 'text-ink' : 'text-ink-faint'}`}>
                         <span className={`grid size-6 place-items-center rounded-full border transition-colors duration-200 ${i < stage ? 'border-ink bg-ink text-paper-raised' : i === stage ? 'border-ink' : 'border-rule-strong'}`}>
-                            {i < stage ? <Check size={13} weight="bold" aria-hidden="true" /> : <span className="font-mono text-[11px]">{i + 1}</span>}
+                            {i < stage ? <Check size={13} weight="bold" aria-hidden="true" /> : <span className="text-[11px]">{i + 1}</span>}
                         </span>
                         {s.label}
                     </li>
@@ -125,7 +125,7 @@ function Upload() {
             </AppBar>
 
             <main id="main" className="mx-auto max-w-2xl px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-10 sm:px-6 md:pt-16">
-                <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">Highlight a PDF</h1>
+                <h1 className="font-display text-4xl font-extrabold tracking-[-0.045em] text-ink md:text-5xl">Highlight a PDF</h1>
                 <p className="mt-2 text-base text-ink-soft">
                     AureLine reads every page and marks the definitions, key concepts and important points.
                 </p>
@@ -148,13 +148,13 @@ function Upload() {
                             />
 
                             {file ? (
-                                <div className="rise-in flex items-center gap-4 rounded-[var(--radius-sheet)] border border-rule bg-paper-raised p-5 shadow-[var(--shadow-sheet)]">
+                                <div className="rise-in sketch flex items-center gap-4 bg-paper-raised p-5 shadow-[var(--shadow-sheet)]">
                                     <span className="grid size-12 shrink-0 place-items-center rounded-[var(--radius-control)] bg-mark-yellow/50">
                                         <FilePdf size={26} className="text-ink" aria-hidden="true" />
                                     </span>
                                     <span className="min-w-0 flex-1">
                                         <span className="block truncate font-medium text-ink">{file.name}</span>
-                                        <span className="mt-0.5 block font-mono text-sm text-ink-faint tabular-nums">{formatBytes(file.size)}</span>
+                                        <span className="mt-0.5 block text-sm text-ink-faint tabular-nums">{formatBytes(file.size)}</span>
                                     </span>
                                     <button
                                         type="button"
@@ -173,14 +173,14 @@ function Upload() {
                                     onDragLeave={handleDragLeave}
                                     onDrop={handleDrop}
                                     className={[
-                                        'group flex min-h-[18rem] w-full flex-col items-center justify-center rounded-[var(--radius-sheet)] border-[1.5px] border-dashed px-6 py-12 text-center',
+                                        'group flex min-h-[18rem] w-full flex-col items-center justify-center rounded-[var(--radius-sheet)] border-[2.5px] border-dashed px-6 py-12 text-center',
                                         'transition-[background-color,border-color] duration-200',
                                         isDragging
                                             ? 'border-ink bg-mark-yellow/25'
-                                            : 'border-rule-strong bg-paper-raised/60 hover-fine:border-ink hover-fine:bg-paper-raised',
+                                            : 'border-ink/50 bg-paper-raised/70 hover-fine:border-ink hover-fine:bg-paper-raised',
                                     ].join(' ')}
                                 >
-                                    <span className={`grid size-14 place-items-center rounded-full border border-rule bg-paper-raised transition-transform duration-200 ease-[var(--ease-out)] ${isDragging ? '-translate-y-1' : ''}`}>
+                                    <span className={`grid size-14 place-items-center rounded-full border-2 border-ink bg-mark-yellow transition-transform duration-200 ease-[var(--ease-out)] ${isDragging ? '-translate-y-1' : ''}`}>
                                         <UploadSimple size={24} className="text-ink" aria-hidden="true" />
                                     </span>
                                     <span className="mt-5 text-lg font-medium text-ink">
@@ -189,7 +189,7 @@ function Upload() {
                                     <span className="mt-1 text-base text-ink-soft">
                                         or <span className="underline decoration-rule-strong underline-offset-4 group-hover:decoration-ink">browse your files</span>
                                     </span>
-                                    <span className="mt-5 font-mono text-xs uppercase tracking-[0.14em] text-ink-faint">PDF · up to 4 MB</span>
+                                    <span className="mt-5 font-hand text-[15px] uppercase tracking-[0.05em] text-ink-faint">PDF · up to 4 MB</span>
                                 </button>
                             )}
 

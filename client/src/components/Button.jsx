@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 
 const VARIANTS = {
-    primary: 'bg-ink text-paper-raised hover-fine:bg-ink-soft',
-    secondary: 'bg-paper-raised text-ink border border-rule-strong hover-fine:border-ink',
-    ghost: 'text-ink-soft hover-fine:text-ink hover-fine:bg-paper-sunken',
-    danger: 'bg-paper-raised text-danger border border-rule-strong hover-fine:border-danger',
+    primary: 'press-ink bg-ink text-paper-raised border-2 border-ink',
+    secondary: 'press-ink bg-paper-raised text-ink border-2 border-ink',
+    ghost: 'pressable text-ink-soft hover-fine:text-ink hover-fine:bg-paper-sunken',
+    danger: 'press-ink bg-paper-raised text-danger border-2 border-ink',
 };
 
 const SIZES = {
@@ -16,7 +16,7 @@ const SIZES = {
 // button, a router link when `to` is given, or a plain link when `href` is
 function Button({ variant = 'primary', size = 'md', to, href, className = '', children, ...props }) {
     const classes = [
-        'pressable inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] font-medium whitespace-nowrap select-none',
+        'inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] font-bold whitespace-nowrap select-none',
         'disabled:opacity-45 disabled:cursor-not-allowed',
         VARIANTS[variant],
         SIZES[size],

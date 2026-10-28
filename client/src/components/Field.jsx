@@ -9,7 +9,7 @@ function Field({ label, error, hint, type = 'text', className = '', ...inputProp
 
     return (
         <div className={`flex flex-col gap-2 ${className}`}>
-            <label htmlFor={id} className="text-sm font-medium text-ink">
+            <label htmlFor={id} className="text-sm font-bold text-ink">
                 {label}
             </label>
 
@@ -21,9 +21,9 @@ function Field({ label, error, hint, type = 'text', className = '', ...inputProp
                     aria-describedby={describedBy}
                     className={[
                         'w-full h-12 rounded-[var(--radius-control)] bg-paper-raised px-4 text-base text-ink',
-                        'border placeholder:text-ink-faint/70 transition-[border-color,box-shadow] duration-150',
-                        'focus:outline-none focus-visible:outline-none focus:border-ink focus:shadow-[0_0_0_3px_var(--color-mark-yellow)]',
-                        error ? 'border-danger' : 'border-rule-strong',
+                        'border-2 placeholder:text-ink-faint/70 transition-[border-color,box-shadow] duration-150',
+                        'focus:outline-none focus-visible:outline-none focus:shadow-[0_0_0_4px_var(--color-mark-yellow)]',
+                        error ? 'border-danger' : 'border-ink',
                         isPassword ? 'pr-20' : '',
                     ].join(' ')}
                     {...inputProps}

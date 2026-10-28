@@ -1,17 +1,20 @@
 import { Link } from 'react-router-dom';
 
-// wordmark: serif "Aure" + "Line" sitting on a yellow marker stroke
+// wordmark: "Aure" + "Line" on a tilted yellow sticker
 function Logo({ to = '/', size = 'md' }) {
-    const text = size === 'lg' ? 'text-[2rem]' : 'text-[1.6rem]';
+    const text = size === 'lg' ? 'text-[1.9rem]' : 'text-[1.55rem]';
 
     return (
         <Link
             to={to}
             aria-label="AureLine home"
             translate="no"
-            className={`font-serif ${text} leading-none tracking-tight text-ink inline-flex items-baseline rounded-sm`}
+            className={`font-display ${text} font-extrabold leading-none tracking-[-0.045em] text-ink inline-flex items-center rounded-sm`}
         >
-            Aure<span className="marker italic">Line</span>
+            Aure
+            <span className="ml-0.5 inline-block -rotate-2 rounded-[5px_3px_6px_3px] border-2 border-ink bg-mark-yellow px-1 pb-0.5">
+                Line
+            </span>
         </Link>
     );
 }

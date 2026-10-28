@@ -4,11 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f4efe4" />
+    <meta name="theme-color" content="#fdfcf7" />
     <meta name="description" content="AureLine reads your PDF and highlights the definitions, key concepts and important points right on the page." />
     <title>AureLine — your PDFs, highlighted</title>
   </head>
-  <body class="paper-grain">
+  <body>
+    <!-- hand-drawn wobble used by the .sketch outlines -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <filter id="wobble" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="1" seed="7" /><feDisplacementMap in="SourceGraphic" scale="2.2" /></filter>
+    </svg>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

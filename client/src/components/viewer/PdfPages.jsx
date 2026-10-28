@@ -31,9 +31,9 @@ function LazyPage({ pageNumber, width, ratio, flashing }) {
             id={`page-${pageNumber}`}
             data-page={pageNumber}
             className={[
-                'relative scroll-mt-24 overflow-hidden rounded-[6px] bg-white shadow-[var(--shadow-sheet)] ring-1 ring-rule',
+                'relative scroll-mt-24 overflow-hidden rounded-[4px] bg-white shadow-[var(--shadow-sheet)] ring-2 ring-ink',
                 'transition-[box-shadow] duration-300',
-                flashing ? 'ring-[3px] ring-ink' : '',
+                flashing ? 'ring-[5px] ring-mark-yellow' : '',
             ].join(' ')}
             style={{ width, height: width * ratio }}
         >
@@ -45,7 +45,7 @@ function LazyPage({ pageNumber, width, ratio, flashing }) {
                     loading=""
                 />
             )}
-            <span className="pointer-events-none absolute bottom-2 right-3 font-mono text-[11px] text-ink-faint">
+            <span className="pointer-events-none absolute bottom-2 right-3 text-[11px] text-ink-faint">
                 {pageNumber}
             </span>
         </div>
@@ -124,7 +124,7 @@ export function PageSkeleton({ width }) {
     return (
         <div
             aria-hidden="true"
-            className="mx-auto rounded-[6px] bg-paper-raised p-[8%] ring-1 ring-rule"
+            className="mx-auto rounded-[4px] bg-paper-raised p-[8%] ring-2 ring-ink/20"
             style={{ width: width || '100%', aspectRatio: '1 / 1.414' }}
         >
             <div className="space-y-3">

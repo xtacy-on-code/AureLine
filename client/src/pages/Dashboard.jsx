@@ -85,7 +85,7 @@ function DocumentRow({ doc, index, onDelete }) {
                     <span className="truncate font-medium text-ink">{doc.filename}</span>
                     <StatusBadge doc={doc} />
                 </span>
-                <span className="mt-0.5 block font-mono text-xs text-ink-faint tabular-nums md:hidden">{meta}</span>
+                <span className="mt-0.5 block text-xs text-ink-faint tabular-nums md:hidden">{meta}</span>
             </span>
         </span>
     );
@@ -109,8 +109,8 @@ function DocumentRow({ doc, index, onDelete }) {
                 <div className="min-w-0">{name}</div>
             )}
 
-            <span className="hidden font-mono text-sm text-ink-soft tabular-nums md:block">{doc.pageCount || '–'}</span>
-            <span className="hidden items-center gap-2 font-mono text-sm text-ink-soft tabular-nums md:flex">
+            <span className="hidden text-sm text-ink-soft tabular-nums md:block">{doc.pageCount || '–'}</span>
+            <span className="hidden items-center gap-2 text-sm text-ink-soft tabular-nums md:flex">
                 {doc.highlightCount ? (
                     <>
                         <span className="h-2.5 w-4 rounded-[2px] bg-mark-yellow mix-blend-multiply" aria-hidden="true" />
@@ -118,7 +118,7 @@ function DocumentRow({ doc, index, onDelete }) {
                     </>
                 ) : '–'}
             </span>
-            <span className="hidden font-mono text-sm text-ink-soft tabular-nums md:block">{formatDate(doc.createdAt)}</span>
+            <span className="hidden text-sm text-ink-soft tabular-nums md:block">{formatDate(doc.createdAt)}</span>
 
             {/* above the row link so it gets its own clicks */}
             <span className="relative z-10 flex justify-end">
@@ -149,7 +149,7 @@ function EmptyLibrary() {
     return (
         <div className="rise-in grid items-center gap-10 border-y border-rule py-16 md:grid-cols-[1fr_auto] md:py-20">
             <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-ink">Nothing highlighted yet</h2>
+                <h2 className="font-display text-3xl font-extrabold tracking-[-0.04em] text-ink">Nothing highlighted yet</h2>
                 <p className="mt-2 max-w-md text-base text-ink-soft">
                     Upload a PDF and AureLine will mark its definitions, key concepts and important points.
                     It will be waiting here when you come back.
@@ -161,7 +161,7 @@ function EmptyLibrary() {
             </div>
 
             {/* a little sheet with the three pens on it */}
-            <div aria-hidden="true" className="hidden w-60 -rotate-2 rounded-[var(--radius-sheet)] border border-rule bg-paper-raised p-6 shadow-[var(--shadow-sheet)] md:block">
+            <div aria-hidden="true" className="sketch hidden w-60 -rotate-2 bg-paper-raised p-6 shadow-[var(--shadow-sheet)] md:block">
                 <div className="space-y-3">
                     <div className="h-2 w-[86%] rounded-full bg-paper-sunken" />
                     <div className="h-2.5 w-[64%] rounded-[3px] bg-mark-yellow mix-blend-multiply" />
@@ -249,9 +249,9 @@ function Dashboard() {
 
             <main id="main" className="mx-auto max-w-6xl px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-10 sm:px-6 md:pt-14">
                 <div className="flex flex-wrap items-end justify-between gap-3">
-                    <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">Library</h1>
+                    <h1 className="font-display text-4xl font-extrabold tracking-[-0.045em] text-ink md:text-5xl">Library</h1>
                     {!loading && documents.length > 0 && (
-                        <p className="font-mono text-sm text-ink-faint tabular-nums">
+                        <p className="text-sm text-ink-faint tabular-nums">
                             {plural(documents.length, 'document')} · {plural(totalHighlights, 'highlight')}
                         </p>
                     )}
@@ -271,7 +271,7 @@ function Dashboard() {
                         !error && <EmptyLibrary />
                     ) : (
                         <>
-                            <div className={`${ROW_GRID} hidden border-b border-rule pb-3 font-mono text-[11px] uppercase tracking-[0.14em] text-ink-faint md:grid`}>
+                            <div className={`${ROW_GRID} hidden border-b border-rule pb-3 font-hand text-[15px] uppercase tracking-[0.05em] text-ink-faint md:grid`}>
                                 <span>Name</span>
                                 <span>Pages</span>
                                 <span>Highlights</span>

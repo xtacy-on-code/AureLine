@@ -14,8 +14,8 @@ const downloadName = (filename) => `${filename.replace(/\.pdf$/i, '')} (highligh
 function DocumentDetails({ doc }) {
     return (
         <div>
-            <h1 className="break-words text-xl font-semibold leading-snug tracking-tight text-ink">{doc.filename}</h1>
-            <p className="mt-1.5 font-mono text-xs text-ink-faint tabular-nums">
+            <h1 className="break-words font-display text-2xl font-extrabold leading-tight tracking-[-0.035em] text-ink">{doc.filename}</h1>
+            <p className="mt-1.5 text-xs text-ink-faint tabular-nums">
                 {[doc.pageCount ? plural(doc.pageCount, 'page') : null, plural(doc.highlightCount || 0, 'highlight'), formatDate(doc.createdAt)]
                     .filter(Boolean)
                     .join(' · ')}
@@ -128,7 +128,7 @@ function Viewer() {
                         </div>
                     </aside>
 
-                    <section aria-label="Highlighted PDF" className="min-w-0 rounded-[var(--radius-sheet)] bg-paper-sunken/70 px-3 py-6 sm:px-8 sm:py-10 lg:order-1">
+                    <section aria-label="Highlighted PDF" className="sketch sketch-thin min-w-0 bg-paper-sunken/70 px-3 py-6 sm:px-8 sm:py-10 lg:order-1">
                         {fileUrl ? (
                             <PdfPages
                                 ref={pagesRef}

@@ -44,17 +44,17 @@ function HighlightList({ highlights, onPick }) {
                         aria-pressed={filter === chip.key}
                         onClick={() => setFilter(chip.key)}
                         className={[
-                            'pressable inline-flex h-9 items-center gap-2 rounded-full border px-3.5 text-sm',
+                            'pressable inline-flex h-9 items-center gap-2 rounded-full border-2 px-3.5 text-sm font-semibold',
                             filter === chip.key
                                 ? 'border-ink bg-ink text-paper-raised'
-                                : 'border-rule-strong bg-paper-raised text-ink-soft hover-fine:border-ink hover-fine:text-ink',
+                                : 'border-ink/30 bg-paper-raised text-ink-soft hover-fine:border-ink hover-fine:text-ink',
                         ].join(' ')}
                     >
                         {chip.tone && (
-                            <span className="h-2.5 w-3.5 rounded-[2px]" style={{ background: `var(--color-mark-${chip.tone})` }} aria-hidden="true" />
+                            <span className="h-2.5 w-3.5 rounded-[2px] ring-1 ring-ink/40" style={{ background: `var(--color-mark-${chip.tone})` }} aria-hidden="true" />
                         )}
                         {chip.label}
-                        <span className={`font-mono text-xs tabular-nums ${filter === chip.key ? 'text-paper-raised/70' : 'text-ink-faint'}`}>{chip.count}</span>
+                        <span className={`text-xs tabular-nums ${filter === chip.key ? 'text-paper-raised/70' : 'text-ink-faint'}`}>{chip.count}</span>
                     </button>
                 ))}
             </div>
@@ -74,7 +74,7 @@ function HighlightList({ highlights, onPick }) {
                             >
                                 <span className="rounded-full" style={{ background: `var(--color-mark-${meta.tone})` }} aria-hidden="true" />
                                 <span className="min-w-0">
-                                    <span className="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
+                                    <span className="flex items-center justify-between gap-3 font-hand text-[15px] uppercase tracking-[0.05em] text-ink-faint">
                                         {meta.label}
                                         <span className="normal-case tracking-normal tabular-nums">
                                             {found ? `p. ${h.page}` : 'not on page'}

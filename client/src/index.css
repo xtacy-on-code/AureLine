@@ -9,33 +9,38 @@
   }
 }
 
-/* Ink & Paper design tokens, see DESIGN.md */
+/* Sketchbook design tokens, see DESIGN.md */
 @theme {
-  --color-paper: #f4efe4;
-  --color-paper-raised: #fbf8f1;
-  --color-paper-sunken: #ebe4d5;
-  --color-rule: #dcd3c1;
-  --color-rule-strong: #c4b9a3;
-  --color-ink: #1d1b17;
-  --color-ink-soft: #4f4a41;
-  --color-ink-faint: #857d70;
-  --color-danger: #a63d2a;
+  --color-paper: #fdfcf7;
+  --color-paper-raised: #ffffff;
+  --color-paper-sunken: #f3f1ea;
+  --color-grid: #e8ecf5;
+  --color-rule: #e3e1d8;
+  --color-rule-strong: #c9cbd2;
+  --color-ink: #22252b;
+  --color-ink-soft: #50545c;
+  --color-ink-faint: #6b6f78;
+  --color-danger: #c2334d;
+  --color-pop: #ff8fab;
 
-  --color-mark-yellow: #f5dc4e;
-  --color-mark-blue: #9cc6ee;
-  --color-mark-green: #a3de95;
+  --color-mark-yellow: #ffe066;
+  --color-mark-blue: #a5d8ff;
+  --color-mark-green: #b2f2bb;
 
-  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
-  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Gaegu", "Comic Sans MS", "Chalkboard SE", cursive;
 
-  --radius-control: 10px;
-  --radius-sheet: 16px;
+  /* irregular radii read as hand-drawn even before the wobble filter */
+  --radius-control: 12px 9px 13px 8px / 9px 13px 8px 12px;
+  --radius-sheet: 18px 12px 20px 11px / 12px 19px 11px 17px;
 
-  --shadow-sheet: 0 1px 0 #1d1b170a, 0 18px 40px -22px #3c2d1440;
+  --shadow-sheet: 4px 5px 0 var(--color-ink);
+  --shadow-sketch-sm: 3px 3px 0 var(--color-ink);
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @layer base {
@@ -46,6 +51,8 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+    /* keep focused or jumped-to elements clear of the sticky app bar */
+    scroll-padding-top: 5rem;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -54,14 +61,14 @@
     }
   }
 
-  html {
-    /* keep focused or jumped-to elements clear of the sticky app bar */
-    scroll-padding-top: 5rem;
-  }
-
+  /* graph paper */
   body {
     @apply bg-paper text-ink font-sans antialiased;
-    font-feature-settings: "ss01";
+    background-image:
+      linear-gradient(var(--color-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+    background-size: 22px 22px;
+    background-position: -1px -1px;
   }
 
   h1,
@@ -84,20 +91,32 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-ink);
-    outline-offset: 2px;
+    outline: 2.5px solid var(--color-ink);
+    outline-offset: 3px;
   }
 }
 
-/* fixed paper grain, never on a scrolling element */
-.paper-grain::before {
+/* ---------- Sketch: a hand-drawn ink outline ----------
+   The outline lives on ::before so the wobble filter never distorts the
+   content inside. Needs the #wobble SVG filter from index.html. */
+.sketch {
+  position: relative;
+  border-radius: var(--radius-sheet);
+}
+
+.sketch::before {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
+  border: 2.5px solid var(--color-ink);
+  border-radius: inherit;
+  filter: url(#wobble);
   pointer-events: none;
-  z-index: 60;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  z-index: 1;
+}
+
+.sketch-thin::before {
+  border-width: 2px;
 }
 
 /* ---------- Marker: a highlighter stroke painted behind inline text ---------- */
@@ -111,16 +130,16 @@
   content: "";
   position: absolute;
   z-index: -1;
-  inset: 0.08em -0.18em 0.02em -0.18em;
+  inset: 0.12em -0.14em 0.04em -0.14em;
   background: var(--marker-color, var(--color-mark-yellow));
-  border-radius: 0.28em 0.5em 0.32em 0.6em / 0.6em 0.4em 0.55em 0.35em;
-  mix-blend-mode: multiply;
-  transform: rotate(-0.6deg) skewX(-6deg);
+  border-radius: 0.3em 0.5em 0.34em 0.55em / 0.55em 0.4em 0.5em 0.35em;
+  transform: rotate(-1.2deg);
   clip-path: inset(0 0 0 0);
 }
 
 .marker[data-tone="blue"] { --marker-color: var(--color-mark-blue); }
 .marker[data-tone="green"] { --marker-color: var(--color-mark-green); }
+.marker[data-tone="pink"] { --marker-color: var(--color-pop); }
 
 /* sweep left to right when [data-drawn] flips to true */
 .marker[data-animate]::before {
@@ -134,15 +153,15 @@
 
 /* a line of text highlighted in a sheet (multi-line friendly) */
 .marker-line {
-  --marker-height: 78%;
+  --marker-height: 82%;
   background-image: linear-gradient(var(--marker-color, var(--color-mark-yellow)), var(--marker-color, var(--color-mark-yellow)));
   background-repeat: no-repeat;
   background-size: 100% var(--marker-height);
   background-position: 0 var(--marker-position, 70%);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  mix-blend-mode: multiply;
   border-radius: 3px;
+  color: var(--color-ink);
 }
 
 .marker-line[data-animate] {
@@ -156,23 +175,47 @@
 
 /* display headlines: a fat stroke across the lower part of the letters */
 .marker-line.marker-display {
-  --marker-height: 42%;
-  --marker-position: 88%;
-  border-radius: 0.12em;
-  padding: 0 0.06em;
-  margin: 0 -0.06em;
+  --marker-height: 50%;
+  --marker-position: 90%;
+  border-radius: 0.1em;
+  padding: 0 0.05em;
+  margin: 0 -0.05em;
 }
 
 .marker-line[data-tone="blue"] { --marker-color: var(--color-mark-blue); }
 .marker-line[data-tone="green"] { --marker-color: var(--color-mark-green); }
+.marker-line[data-tone="pink"] { --marker-color: var(--color-pop); }
 
-/* ---------- Pressable: tactile feedback for buttons and rows ---------- */
+/* ---------- Press feedback ---------- */
+/* plain controls: a tiny squeeze */
 .pressable {
-  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+  transition: transform 140ms var(--ease-out), background-color 140ms ease, color 140ms ease, box-shadow 140ms var(--ease-out);
 }
 
 .pressable:active:not(:disabled) {
   transform: scale(0.97);
+}
+
+/* controls with a hard shadow press down into it */
+.press-ink {
+  box-shadow: var(--shadow-sketch-sm);
+  transition: transform 120ms var(--ease-out), box-shadow 120ms var(--ease-out), background-color 140ms ease, color 140ms ease;
+}
+
+.press-ink:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--color-ink);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .press-ink:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--color-ink);
+  }
+  .press-ink:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--color-ink);
+  }
 }
 
 /* ---------- Entrances ---------- */
@@ -192,6 +235,11 @@
   animation-delay: calc(var(--i, 0) * 40ms);
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .marker[data-animate]::before,
   .marker-line[data-animate] {
@@ -206,22 +254,9 @@
   .rise-in {
     animation: fade-in 200ms ease both;
   }
-  .pressable:active:not(:disabled) {
+  .pressable:active:not(:disabled),
+  .press-ink:active:not(:disabled),
+  .press-ink:hover:not(:disabled) {
     transform: none;
   }
-}
-
-/* hero demo: the scanner band travels from above the page to its bottom edge */
-@keyframes scan {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
