@@ -74,13 +74,13 @@ function HighlightList({ highlights, onPick }) {
                             >
                                 <span className="rounded-full" style={{ background: `var(--color-mark-${meta.tone})` }} aria-hidden="true" />
                                 <span className="min-w-0">
-                                    <span className="flex items-center justify-between gap-3 font-hand text-[15px] uppercase tracking-[0.05em] text-ink-faint">
+                                    <span className="flex items-center justify-between gap-3 font-hand text-[0.9375rem] uppercase tracking-[0.05em] text-ink-faint">
                                         {meta.label}
                                         <span className="normal-case tracking-normal tabular-nums">
                                             {found ? `p. ${h.page}` : 'not on page'}
                                         </span>
                                     </span>
-                                    <span className={`mt-1.5 block text-[15px] leading-relaxed ${found ? 'text-ink group-hover:underline group-hover:decoration-rule-strong group-hover:underline-offset-4' : 'text-ink-faint'}`}>
+                                    <span className={`mt-1.5 block text-[0.9375rem] leading-relaxed ${found ? 'text-ink group-hover:underline group-hover:decoration-rule-strong group-hover:underline-offset-4' : 'text-ink-faint'}`}>
                                         {h.text}
                                     </span>
                                 </span>

@@ -118,7 +118,7 @@ function TryItLive({ startTo }) {
                         </div>
                     ) : result ? (
                         <>
-                            <p className="text-[16px] leading-[1.85] text-ink-soft">
+                            <p className="text-base leading-[1.85] text-ink-soft">
                                 {toRuns(result.text, result.highlights).map((r, i) =>
                                     r.type ? (
                                         <span

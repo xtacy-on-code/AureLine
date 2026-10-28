@@ -51,7 +51,7 @@ function StoryDoc({ step }) {
             <div className="sketch relative overflow-hidden bg-white px-6 pb-9 pt-8 shadow-[var(--shadow-sheet)]">
                 <p className="font-display text-xl font-extrabold tracking-[-0.03em] text-ink">3.2 Photosynthesis</p>
 
-                <div className="mt-4 space-y-2.5 text-[14.5px] leading-[1.5] text-ink-soft">
+                <div className="mt-4 space-y-2.5 text-[0.90625rem] leading-[1.5] text-ink-soft">
                     {LINES.map((line, i) => {
                         const meta = line.type ? HIGHLIGHT_TYPES[line.type] : null;
                         const picked = meta && step >= 2;

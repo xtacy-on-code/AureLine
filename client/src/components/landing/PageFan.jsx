@@ -56,8 +56,8 @@ const FAN = [
 function MiniPage({ page, drawn, index }) {
     return (
         <div className="sketch sketch-thin h-full bg-white px-4 pb-5 pt-4 shadow-[var(--shadow-sheet)]">
-            <p className="font-display text-[15px] font-extrabold leading-tight tracking-[-0.02em] text-ink">{page.title}</p>
-            <div className="mt-2 space-y-1.5 text-[12px] leading-[1.5] text-ink-soft">
+            <p className="font-display text-[0.9375rem] font-extrabold leading-tight tracking-[-0.02em] text-ink">{page.title}</p>
+            <div className="mt-2 space-y-1.5 text-xs leading-[1.5] text-ink-soft">
                 {page.lines.map((line, i) => (
                     <p key={i}>
                         {line.map((run, j) =>

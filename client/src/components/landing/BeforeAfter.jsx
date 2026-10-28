@@ -36,7 +36,7 @@ function Page({ marked }) {
                 block.heading ? (
                     <p key={i} className="mt-4 font-display text-[1.7rem] font-extrabold tracking-[-0.03em] text-ink">{block.heading}</p>
                 ) : (
-                    <p key={i} className="mt-4 text-[15px] leading-[1.8] text-ink-soft">
+                    <p key={i} className="mt-4 text-[0.9375rem] leading-[1.8] text-ink-soft">
                         {block.map((run, j) =>
                             typeof run === 'string' ? (
                                 <span key={j}>{run}</span>

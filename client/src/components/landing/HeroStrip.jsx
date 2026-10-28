@@ -59,7 +59,7 @@ function HeroStrip({ startTo }) {
                         <span>p. 47</span>
                     </div>
                     <p className="mt-3 font-display text-2xl font-extrabold tracking-[-0.03em] text-ink">4. Why we forget</p>
-                    <p className="mt-3 text-[15px] leading-[1.8] text-ink-soft">
+                    <p className="mt-3 text-[0.9375rem] leading-[1.8] text-ink-soft">
                         {PAGE.map((run, i) =>
                             typeof run === 'string' ? (
                                 <span key={i}>{run}</span>

@@ -45,7 +45,7 @@ function LazyPage({ pageNumber, width, ratio, flashing }) {
                     loading=""
                 />
             )}
-            <span className="pointer-events-none absolute bottom-2 right-3 text-[11px] text-ink-faint">
+            <span className="pointer-events-none absolute bottom-2 right-3 text-[0.6875rem] text-ink-faint">
                 {pageNumber}
             </span>
         </div>
@@ -63,7 +63,9 @@ const PdfPages = forwardRef(function PdfPages({ file, onError }, ref) {
     useEffect(() => {
         if (!containerRef.current) return;
         const observer = new ResizeObserver(([entry]) => {
-            setWidth(Math.min(Math.floor(entry.contentRect.width), 860));
+            // cap at 53.75rem (860px at the default size) so it scales with the root font size
+            const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+            setWidth(Math.min(Math.floor(entry.contentRect.width), Math.round(53.75 * rem)));
         });
         observer.observe(containerRef.current);
         return () => observer.disconnect();

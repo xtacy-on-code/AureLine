@@ -8,7 +8,7 @@ const VARIANTS = {
 };
 
 const SIZES = {
-    md: 'h-11 px-5 text-[15px]',
+    md: 'h-11 px-5 text-[0.9375rem]',
     sm: 'h-10 px-4 text-sm',
     lg: 'h-13 px-7 text-base',
 };

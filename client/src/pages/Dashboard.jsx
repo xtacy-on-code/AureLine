@@ -271,7 +271,7 @@ function Dashboard() {
                         !error && <EmptyLibrary />
                     ) : (
                         <div className="rise-in sketch bg-paper-raised px-5 pb-2 pt-5 shadow-[var(--shadow-sheet)] sm:px-7">
-                            <div className={`${ROW_GRID} hidden border-b border-rule pb-3 font-hand text-[15px] uppercase tracking-[0.05em] text-ink-faint md:grid`}>
+                            <div className={`${ROW_GRID} hidden border-b border-rule pb-3 font-hand text-[0.9375rem] uppercase tracking-[0.05em] text-ink-faint md:grid`}>
                                 <span>Name</span>
                                 <span>Pages</span>
                                 <span>Highlights</span>

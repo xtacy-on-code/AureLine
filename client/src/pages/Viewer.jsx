@@ -106,7 +106,7 @@ function Viewer() {
                                     <DocumentDetails doc={doc} />
 
                                     <details className="group mt-6 lg:hidden">
-                                        <summary className="flex h-12 cursor-pointer list-none items-center justify-between rounded-[var(--radius-control)] border border-rule-strong bg-paper-raised px-4 text-[15px] font-medium text-ink [&::-webkit-details-marker]:hidden">
+                                        <summary className="flex h-12 cursor-pointer list-none items-center justify-between rounded-[var(--radius-control)] border border-rule-strong bg-paper-raised px-4 text-[0.9375rem] font-medium text-ink [&::-webkit-details-marker]:hidden">
                                             {plural(highlights.length, 'highlight')}
                                             <CaretDown size={16} className="transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
                                         </summary>

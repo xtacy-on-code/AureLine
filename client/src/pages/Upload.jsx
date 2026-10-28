@@ -44,9 +44,9 @@ function Processing({ file }) {
 
             <ol className="mt-9 space-y-3.5 border-t border-rule pt-7">
                 {STAGES.map((s, i) => (
-                    <li key={s.label} className={`flex items-center gap-3 text-[15px] transition-colors duration-200 ${i <= stage ? 'text-ink' : 'text-ink-faint'}`}>
+                    <li key={s.label} className={`flex items-center gap-3 text-[0.9375rem] transition-colors duration-200 ${i <= stage ? 'text-ink' : 'text-ink-faint'}`}>
                         <span className={`grid size-6 place-items-center rounded-full border transition-colors duration-200 ${i < stage ? 'border-ink bg-ink text-paper-raised' : i === stage ? 'border-ink' : 'border-rule-strong'}`}>
-                            {i < stage ? <Check size={13} weight="bold" aria-hidden="true" /> : <span className="text-[11px]">{i + 1}</span>}
+                            {i < stage ? <Check size={13} weight="bold" aria-hidden="true" /> : <span className="text-[0.6875rem]">{i + 1}</span>}
                         </span>
                         {s.label}
                     </li>
@@ -189,7 +189,7 @@ function Upload() {
                                     <span className="mt-1 text-base text-ink-soft">
                                         or <span className="underline decoration-rule-strong underline-offset-4 group-hover:decoration-ink">browse your files</span>
                                     </span>
-                                    <span className="mt-5 font-hand text-[15px] uppercase tracking-[0.05em] text-ink-faint">PDF · up to 4 MB</span>
+                                    <span className="mt-5 font-hand text-[0.9375rem] uppercase tracking-[0.05em] text-ink-faint">PDF · up to 4 MB</span>
                                 </button>
                             )}
 
