@@ -8,7 +8,7 @@ function AuthLayout({ title, subtitle, children, footer }) {
             <div className="flex flex-col px-4 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-10">
                 <Logo />
 
-                <main className="flex flex-1 items-center py-12">
+                <main id="main" className="flex flex-1 items-center py-12">
                     <div className="rise-in mx-auto w-full max-w-sm">
                         <h1 className="font-serif text-[2.75rem] leading-none tracking-tight text-ink">{title}</h1>
                         {subtitle && <p className="mt-3 text-base text-ink-soft">{subtitle}</p>}

@@ -1,9 +1,20 @@
-import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { HIGHLIGHT_TYPES } from '../../lib/format';
 
 // filter chips plus the list of highlights; picking one jumps to its page
 function HighlightList({ highlights, onPick }) {
-    const [filter, setFilter] = useState('all');
+    // the filter lives in the URL (?type=definition) so it survives refresh and can be shared
+    const [searchParams, setSearchParams] = useSearchParams();
+    const requested = searchParams.get('type');
+    const filter = HIGHLIGHT_TYPES[requested] ? requested : 'all';
+
+    const setFilter = (type) => {
+        setSearchParams(params => {
+            if (type === 'all') params.delete('type');
+            else params.set('type', type);
+            return params;
+        }, { replace: true });
+    };
 
     const counts = highlights.reduce((acc, h) => {
         acc[h.type] = (acc[h.type] || 0) + 1;

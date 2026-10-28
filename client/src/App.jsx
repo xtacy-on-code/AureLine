@@ -25,6 +25,12 @@ function GuestOnly({ children }) {
 function App() {
   return (
     <BrowserRouter>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-[var(--radius-control)] focus:bg-ink focus:px-4 focus:py-3 focus:text-paper-raised"
+      >
+        Skip to content
+      </a>
       <Suspense fallback={<div className="min-h-[100dvh]" />}>
         <Routes>
           {/* public routes */}

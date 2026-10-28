@@ -54,9 +54,28 @@
     }
   }
 
+  html {
+    /* keep focused or jumped-to elements clear of the sticky app bar */
+    scroll-padding-top: 5rem;
+  }
+
   body {
     @apply bg-paper text-ink font-sans antialiased;
     font-feature-settings: "ss01";
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  a,
+  button,
+  summary,
+  label {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   ::selection {

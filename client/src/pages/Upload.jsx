@@ -124,7 +124,7 @@ function Upload() {
                 </Button>
             </AppBar>
 
-            <main className="mx-auto max-w-2xl px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-10 sm:px-6 md:pt-16">
+            <main id="main" className="mx-auto max-w-2xl px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-10 sm:px-6 md:pt-16">
                 <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">Highlight a PDF</h1>
                 <p className="mt-2 text-base text-ink-soft">
                     AureLine reads every page and marks the definitions, key concepts and important points.

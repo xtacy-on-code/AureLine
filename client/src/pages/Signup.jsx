@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 import { apiRequest } from '../lib/api';
@@ -26,6 +26,7 @@ function Signup() {
 
     const { login } = useAuth();
     const navigate = useNavigate();
+    const formRef = useRef(null);
 
     const update = (key) => (e) => {
         setForm(f => ({ ...f, [key]: e.target.value }));
@@ -38,7 +39,11 @@ function Signup() {
 
         const errors = validate(form);
         setFieldErrors(errors);
-        if (Object.keys(errors).length) return;
+        if (Object.keys(errors).length) {
+            // move focus to the first field that needs fixing
+            requestAnimationFrame(() => formRef.current?.querySelector('[aria-invalid="true"]')?.focus());
+            return;
+        }
 
         setLoading(true);
         try {
@@ -59,7 +64,7 @@ function Signup() {
             subtitle="Free account. Your PDFs stay private to you."
             footer={<>Already have an account? <Link to="/login" className="font-medium text-ink underline decoration-rule-strong underline-offset-4 hover-fine:decoration-ink">Log in</Link></>}
         >
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
+            <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
                 <FormError>{error}</FormError>
 
                 <Field

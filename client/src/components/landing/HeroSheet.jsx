@@ -99,9 +99,9 @@ function HeroSheet() {
                     <span>p. 47</span>
                 </div>
 
-                <h3 className="mt-6 font-serif text-[2rem] leading-none tracking-tight text-ink">
+                <p className="mt-6 font-serif text-[2rem] leading-none tracking-tight text-ink">
                     4. Why we forget
-                </h3>
+                </p>
 
                 <div className="mt-5 space-y-4 text-[15px] leading-[1.75] text-ink-soft">
                     {PARAGRAPHS.map((runs, p) => (

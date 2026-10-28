@@ -8,6 +8,7 @@ function Logo({ to = '/', size = 'md' }) {
         <Link
             to={to}
             aria-label="AureLine home"
+            translate="no"
             className={`font-serif ${text} leading-none tracking-tight text-ink inline-flex items-baseline rounded-sm`}
         >
             Aure<span className="marker italic">Line</span>

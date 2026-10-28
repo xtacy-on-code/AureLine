@@ -247,7 +247,7 @@ function Dashboard() {
                 </Button>
             </AppBar>
 
-            <main className="mx-auto max-w-6xl px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-10 sm:px-6 md:pt-14">
+            <main id="main" className="mx-auto max-w-6xl px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-10 sm:px-6 md:pt-14">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                     <h1 className="text-3xl font-semibold tracking-tight text-ink md:text-4xl">Library</h1>
                     {!loading && documents.length > 0 && (

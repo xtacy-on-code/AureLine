@@ -92,12 +92,12 @@ function Viewer() {
             </AppBar>
 
             {error ? (
-                <main className="mx-auto max-w-xl px-4 py-16 sm:px-6">
+                <main id="main" className="mx-auto max-w-xl px-4 py-16 sm:px-6">
                     <FormError>{error}</FormError>
                     <Button to="/dashboard" variant="secondary" className="mt-6">Back to library</Button>
                 </main>
             ) : (
-                <main className="mx-auto grid max-w-[1400px] gap-8 px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-10 lg:pt-8">
+                <main id="main" className="mx-auto grid max-w-[1400px] gap-8 px-4 pb-[max(4rem,env(safe-area-inset-bottom))] pt-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_23rem] lg:gap-10 lg:pt-8">
                     {/* highlights: collapsible above the pages on small screens, sticky sidebar on large */}
                     <aside className="lg:order-2">
                         <div className="lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto lg:pr-1">
