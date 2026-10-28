@@ -1,6 +1,8 @@
 const { PDFDocument, rgb } = require('pdf-lib');
 const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
 
+// load the worker up front so Vercel bundles it (pdfjs otherwise requires it dynamically)
+globalThis.pdfjsWorker = require('pdfjs-dist/legacy/build/pdf.worker.js');
 pdfjsLib.GlobalWorkerOptions.workerSrc = false;
 
 // COLORS
