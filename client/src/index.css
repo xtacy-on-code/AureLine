@@ -1,1 +1,173 @@
 @import "tailwindcss";
+
+/* Ink & Paper design tokens, see DESIGN.md */
+@theme {
+  --color-paper: #f4efe4;
+  --color-paper-raised: #fbf8f1;
+  --color-paper-sunken: #ebe4d5;
+  --color-rule: #dcd3c1;
+  --color-rule-strong: #c4b9a3;
+  --color-ink: #1d1b17;
+  --color-ink-soft: #4f4a41;
+  --color-ink-faint: #857d70;
+  --color-danger: #a63d2a;
+
+  --color-mark-yellow: #f5dc4e;
+  --color-mark-blue: #9cc6ee;
+  --color-mark-green: #a3de95;
+
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+
+  --radius-control: 10px;
+  --radius-sheet: 16px;
+
+  --shadow-sheet: 0 1px 0 #1d1b170a, 0 18px 40px -22px #3c2d1440;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-feature-settings: "ss01";
+  }
+
+  ::selection {
+    background: var(--color-mark-yellow);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+}
+
+/* fixed paper grain, never on a scrolling element */
+.paper-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Marker: a highlighter stroke painted behind inline text ---------- */
+.marker {
+  position: relative;
+  isolation: isolate;
+  white-space: inherit;
+}
+
+.marker::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0.08em -0.18em 0.02em -0.18em;
+  background: var(--marker-color, var(--color-mark-yellow));
+  border-radius: 0.28em 0.5em 0.32em 0.6em / 0.6em 0.4em 0.55em 0.35em;
+  mix-blend-mode: multiply;
+  transform: rotate(-0.6deg) skewX(-6deg);
+  clip-path: inset(0 0 0 0);
+}
+
+.marker[data-tone="blue"] { --marker-color: var(--color-mark-blue); }
+.marker[data-tone="green"] { --marker-color: var(--color-mark-green); }
+
+/* sweep left to right when [data-drawn] flips to true */
+.marker[data-animate]::before {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path var(--marker-duration, 800ms) var(--ease-in-out) var(--marker-delay, 0ms);
+}
+
+.marker[data-animate][data-drawn="true"]::before {
+  clip-path: inset(0 0 0 0);
+}
+
+/* a line of text highlighted in a sheet (multi-line friendly) */
+.marker-line {
+  background-image: linear-gradient(var(--marker-color, var(--color-mark-yellow)), var(--marker-color, var(--color-mark-yellow)));
+  background-repeat: no-repeat;
+  background-size: 100% 78%;
+  background-position: 0 70%;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  mix-blend-mode: multiply;
+  border-radius: 3px;
+}
+
+.marker-line[data-animate] {
+  background-size: 0% 78%;
+  transition: background-size var(--marker-duration, 700ms) var(--ease-in-out) var(--marker-delay, 0ms);
+}
+
+.marker-line[data-animate][data-drawn="true"] {
+  background-size: 100% 78%;
+}
+
+.marker-line[data-tone="blue"] { --marker-color: var(--color-mark-blue); }
+.marker-line[data-tone="green"] { --marker-color: var(--color-mark-green); }
+
+/* ---------- Pressable: tactile feedback for buttons and rows ---------- */
+.pressable {
+  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.pressable:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ---------- Entrances ---------- */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 420ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marker[data-animate]::before,
+  .marker-line[data-animate] {
+    transition: none;
+  }
+  .marker[data-animate]::before {
+    clip-path: inset(0 0 0 0);
+  }
+  .marker-line[data-animate] {
+    background-size: 100% 78%;
+  }
+  .rise-in {
+    animation: fade-in 200ms ease both;
+  }
+  .pressable:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
