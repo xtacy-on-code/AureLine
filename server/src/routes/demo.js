@@ -37,7 +37,8 @@ router.post('/highlight', perVisitor, perDay, async (req, res) => {
     }
 
     try {
-        const { highlights } = await highlightPDF([text]);
+        // a short paragraph reads best with only a few marks
+        const { highlights } = await highlightPDF([text], { maxHighlights: 4 });
 
         // keep only highlights we can place, in reading order, without overlaps
         const placed = highlights

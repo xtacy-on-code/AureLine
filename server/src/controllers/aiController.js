@@ -37,16 +37,17 @@ const fitText = (pageTexts) => {
 };
 
 // CLEAN RESULT - keep only well-formed highlights with a known type
-const cleanHighlights = (parsed) => {
+const cleanHighlights = (parsed, max = MAX_HIGHLIGHTS) => {
     const list = Array.isArray(parsed?.highlights) ? parsed.highlights : [];
 
     return list
         .filter(h => typeof h?.text === 'string' && h.text.trim() && TYPE_COLORS[h.type])
-        .slice(0, MAX_HIGHLIGHTS)
+        .slice(0, max)
         .map(h => ({ text: h.text.trim(), type: h.type, color: TYPE_COLORS[h.type] }));
 };
 
-const highlightPDF = async (pageTexts) => {
+// maxHighlights lets short texts (the landing demo) ask for fewer marks
+const highlightPDF = async (pageTexts, { maxHighlights = MAX_HIGHLIGHTS } = {}) => {
     const prompt = `
 You are an AI PDF highlighter.
 
@@ -74,7 +75,7 @@ STRICT RULES:
 - Each highlight should ideally fit within one visible line in the PDF
 - Extract only genuinely important content
 - Spread highlights across the whole document, not just the beginning
-- Maximum ${MAX_HIGHLIGHTS} highlights
+- Maximum ${maxHighlights} highlights
 
 TYPE RULES:
 - definition: a term and what it means
@@ -124,7 +125,7 @@ ${fitText(pageTexts)}
         throw new Error('AI returned invalid JSON');
     }
 
-    return { highlights: cleanHighlights(parsed) };
+    return { highlights: cleanHighlights(parsed, maxHighlights) };
 };
 
 module.exports = { highlightPDF, fitText, cleanHighlights };
