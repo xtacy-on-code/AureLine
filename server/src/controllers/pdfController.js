@@ -241,4 +241,17 @@ const highlightPDFDoc = async (pdfBuffer, pages, highlights) => {
     }
 };
 
-module.exports = { readPdf, extractText, highlightPDFDoc, normalizeText };
+// FIND IN PLAIN TEXT - same matching as on a PDF page, for pasted text (landing demo).
+// Returns { start, end } character offsets into the original text, or null
+const findPhraseInText = (text, phrase) => {
+    const item = { str: text, hasEOL: false, width: 0, transform: [1, 0, 0, 1, 0, 0] };
+    const index = buildPageIndex([item]);
+    const match = findPhrase([index], phrase);
+    if (!match) return null;
+
+    const first = index.map.slice(match.start, match.end).find(Boolean);
+    const last = index.map.slice(match.start, match.end).reverse().find(Boolean);
+    return { start: first.charIndex, end: last.charIndex + 1 };
+};
+
+module.exports = { readPdf, extractText, highlightPDFDoc, normalizeText, findPhraseInText };

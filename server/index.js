@@ -42,6 +42,10 @@ app.use(async (req, res, next) => {
 const authRouter = require('./src/routes/auth');
 app.use('/api/auth', authRouter);
 
+// landing page demo, no login
+const demoRouter = require('./src/routes/demo');
+app.use('/api/demo', demoRouter);
+
 // upload route
 const uploadRouter = require('./src/routes/upload');
 app.use('/api', uploadRouter);

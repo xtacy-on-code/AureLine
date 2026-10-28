@@ -133,3 +133,13 @@ test('extractText returns the text of every page', async () => {
     assert.match(pageTexts[0], /first page text/);
     assert.match(pageTexts[1], /second page text/);
 });
+
+test('findPhraseInText returns offsets into the original text', () => {
+    const { findPhraseInText } = require('../src/controllers/pdfController');
+    const text = 'Notes:  The  Calvin cycle uses ATP and NADPH to fix carbon dioxide.\nOther stuff.';
+    const found = findPhraseInText(text, 'the calvin cycle uses ATP, and NADPH');
+
+    assert.ok(found);
+    assert.strictEqual(text.slice(found.start, found.end), 'The  Calvin cycle uses ATP and NADPH');
+    assert.strictEqual(findPhraseInText(text, 'mitochondria make energy for the cell'), null);
+});
