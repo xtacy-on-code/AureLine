@@ -4,7 +4,7 @@ const { highlightPDF} = require('../controllers/aiController');
 const Document = require('../models/Document');
 const Highlight = require('../models/Highlight');
 const authMiddleware = require('../middleware/auth');
-const { highlightPDFDoc, extractText } = require('../controllers/pdfController');
+const { readPdf, extractText, highlightPDFDoc } = require('../controllers/pdfController');
 
 const storage = multer.memoryStorage();
 
@@ -23,13 +23,13 @@ const upload = multer ({
 // POST route to handle PDF upload and processing
 router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) => {
     try {
-        const text = await extractText(req.file.buffer);
-        const highlights = await highlightPDF(text);
-
-        console.log('AI HIGHLIGHTS:', JSON.stringify(highlights, null, 2));
+        // read every page once, reused for the AI text and for drawing highlights
+        const pages = await readPdf(req.file.buffer);
+        const highlights = await highlightPDF(extractText(pages));
 
         // draw highlights on the PDF
-        const highlightedPdfBuffer = await highlightPDFDoc(req.file.buffer, highlights.highlights);
+        const { buffer: highlightedPdfBuffer, highlights: placedHighlights } =
+            await highlightPDFDoc(req.file.buffer, pages, highlights.highlights);
 
         // convert to base64 so we can send it to frontend
         const highlightedPdfBase64 = highlightedPdfBuffer.toString('base64');
@@ -45,7 +45,7 @@ router.post('/upload', authMiddleware, upload.single('pdf'), async (req, res) =>
         const highlightDoc = new Highlight({
             userId: req.user.userId,
             documentId: pdfDocument._id,
-            highlights: highlights.highlights
+            highlights: placedHighlights
         });
         await highlightDoc.save();
 

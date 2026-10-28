@@ -15,7 +15,8 @@ const highlightSchema = new mongoose.Schema({
         type: [{
             text: { type: String, required: true },
             type: { type: String, required: true },
-            color: { type: String, required: true }
+            color: { type: String, required: true },
+            page: { type: Number, default: null }
         }]
     }
 }, {timestamps: true});

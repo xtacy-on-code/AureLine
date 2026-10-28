@@ -12,142 +12,233 @@ const colorMap = {
     green: rgb(0.2, 0.9, 0.4)
 };
 
-// FIND TEXT POSITIONS
-const findTextPositions = async (pdfData, searchText) => {
-    try {
-        const positions = [];
+// shortest phrase we will still highlight when the exact text isn't found
+const MIN_FALLBACK_WORDS = 4;
 
-        const targetWords = searchText
-            .toLowerCase()
-            .split(" ")
-            .filter(word => word.length > 3);
+// READ PDF ONCE - every page's text items, shared by text extraction and highlighting
+const readPdf = async (pdfBuffer) => {
+    const pdfData = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer) }).promise;
 
-        // LOOP THROUGH ALL PAGES
-        for (let pageNum = 1; pageNum <= pdfData.numPages; pageNum++) {
-            const page = await pdfData.getPage(pageNum);
-            const textContent = await page.getTextContent();
-            const items = textContent.items;
+    const pages = [];
+    for (let pageNum = 1; pageNum <= pdfData.numPages; pageNum++) {
+        const page = await pdfData.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        pages.push(textContent.items.filter(item => typeof item.str === 'string'));
+    }
 
-            for (const item of items) {
-                if (!item.str) continue;
-                const chunk = item.str.toLowerCase().trim();
+    await pdfData.destroy();
+    return pages;
+};
 
-                if (chunk.length < 4) continue;
+// JOIN ITEMS - pdfjs splits text into items that may be part of a word or several
+// words, so work out from the layout what goes between each item and the next:
+// '' (same word), ' ', '\n', or '-' (word hyphenated across a line break)
+const fontSizeOf = (item) => Math.hypot(item.transform[2], item.transform[3]) || item.height || 10;
 
-                const matchedWords = targetWords.filter(word =>
-                    chunk.includes(word) ||
-                    word.includes(chunk)
-                );
+const joinItems = (items) => {
+    const segments = [];
 
-                if (matchedWords.length > 0) {
-                    positions.push({
-                        pageNum,
-                        x: item.transform[4],
-                        y: item.transform[5],
-                        width: item.width,
-                        height: item.height || 10
-                    });
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.str === '') continue;
+
+        // look past empty items, which only mark line breaks
+        let lineBreak = item.hasEOL;
+        let j = i + 1;
+        while (j < items.length && items[j].str === '') {
+            if (items[j].hasEOL) lineBreak = true;
+            j++;
+        }
+        const next = items[j];
+
+        let separator;
+        if (!next) {
+            separator = '\n';
+        } else if (lineBreak || Math.abs(next.transform[5] - item.transform[5]) > fontSizeOf(item) * 0.5) {
+            separator = /[\p{L}]-$/u.test(item.str) ? '-' : '\n';
+        } else if (/\s$/.test(item.str) || /^\s/.test(next.str)) {
+            separator = '';
+        } else {
+            const gap = next.transform[4] - (item.transform[4] + item.width);
+            separator = gap > fontSizeOf(item) * 0.15 ? ' ' : '';
+        }
+
+        segments.push({ itemIndex: i, str: item.str, separator });
+    }
+
+    return segments;
+};
+
+// EXTRACT TEXT - same joining rules as the page index, so the AI quotes text we can find
+const extractText = (pages) => {
+    let text = '';
+    for (const items of pages) {
+        for (const { str, separator } of joinItems(items)) {
+            text += separator === '-' ? str.slice(0, -1) : str + separator;
+        }
+        text += '\n';
+    }
+    return text;
+};
+
+// NORMALIZE - lowercase letters/digits separated by single spaces, so punctuation,
+// quotes, ligatures and line breaks don't stop a match
+const isWordChar = (ch) => /[\p{L}\p{N}]/u.test(ch);
+
+const normalizeText = (text) => {
+    return text
+        .normalize('NFKC')
+        .toLowerCase()
+        .split('')
+        .map(ch => (isWordChar(ch) ? ch : ' '))
+        .join('')
+        .replace(/\s+/g, ' ')
+        .trim();
+};
+
+// BUILD PAGE INDEX - normalized page text plus, for every character, which item
+// and which character inside that item it came from
+const buildPageIndex = (items) => {
+    let text = '';
+    const map = [];
+
+    const pushSpace = () => {
+        if (text.length > 0 && text[text.length - 1] !== ' ') {
+            text += ' ';
+            map.push(null);
+        }
+    };
+
+    for (const { itemIndex, str, separator } of joinItems(items)) {
+        // drop the hyphen of a word split across lines so "bio-" + "chemical" reads "biochemical"
+        const end = separator === '-' ? str.length - 1 : str.length;
+
+        // normalize per character so charIndex still points into the original item
+        for (let i = 0; i < end; i++) {
+            for (const ch of str[i].normalize('NFKC').toLowerCase()) {
+                if (isWordChar(ch)) {
+                    text += ch;
+                    map.push({ itemIndex, charIndex: i });
+                } else {
+                    pushSpace();
                 }
             }
         }
-        return positions;
 
-    } catch (err) {
-        console.log(err);
-        return [];
+        if (separator === ' ' || separator === '\n') pushSpace();
     }
+
+    return { text, map };
 };
 
-// MERGE NEARBY RECTANGLES
-const mergePositions = (positions) => {
-    positions.sort((a, b) => {
-        if (a.pageNum !== b.pageNum) {
-            return a.pageNum - b.pageNum;
+// FIND PHRASE - exact normalized match first, then the longest leading part of it
+const findPhrase = (pageIndexes, searchText) => {
+    const words = normalizeText(searchText).split(' ').filter(Boolean);
+    if (words.length === 0) return null;
+
+    for (let count = words.length; count >= Math.min(MIN_FALLBACK_WORDS, words.length); count--) {
+        const needle = words.slice(0, count).join(' ');
+
+        for (let pageNum = 0; pageNum < pageIndexes.length; pageNum++) {
+            const { text } = pageIndexes[pageNum];
+
+            // match whole words only
+            let from = 0;
+            while (from <= text.length) {
+                const start = text.indexOf(needle, from);
+                if (start === -1) break;
+
+                const end = start + needle.length;
+                const boundaryBefore = start === 0 || text[start - 1] === ' ';
+                const boundaryAfter = end === text.length || text[end] === ' ';
+
+                if (boundaryBefore && boundaryAfter) {
+                    return { pageNum, start, end };
+                }
+                from = start + 1;
+            }
         }
-        return a.x - b.x;
-    });
+    }
 
-    const merged = [];
+    return null;
+};
 
-    for (const pos of positions) {
-        const last = merged[merged.length - 1];
-        if (
-            last &&
-            last.pageNum === pos.pageNum &&
-            Math.abs(last.y - pos.y) < 5 &&
-            pos.x <= last.x + last.width + 12
-        ) {
-            last.width =
-                (pos.x + pos.width) - last.x;
+// MATCH TO RECTANGLES - one rectangle per text item the match touches, trimmed
+// to the matched characters inside that item
+const matchToRects = (items, map, match) => {
+    const spans = new Map();
+
+    for (let i = match.start; i < match.end; i++) {
+        const entry = map[i];
+        if (!entry) continue;
+
+        const span = spans.get(entry.itemIndex);
+        if (!span) {
+            spans.set(entry.itemIndex, { first: entry.charIndex, last: entry.charIndex });
         } else {
-            merged.push({ ...pos });
+            span.last = entry.charIndex;
         }
     }
 
-    return merged;
+    const rects = [];
+    for (const [itemIndex, span] of spans) {
+        const item = items[itemIndex];
+        const length = item.str.length || 1;
+        const fontSize = Math.hypot(item.transform[2], item.transform[3]) || item.height || 10;
+
+        rects.push({
+            x: item.transform[4] + (item.width * span.first) / length,
+            y: item.transform[5],
+            width: (item.width * (span.last - span.first + 1)) / length,
+            height: fontSize
+        });
+    }
+
+    return rects;
 };
 
-// MAIN FUNCTION
-const highlightPDFDoc = async (pdfBuffer, highlights) => {
+// MAIN FUNCTION - draws the highlights and returns which page each one landed on
+const highlightPDFDoc = async (pdfBuffer, pages, highlights) => {
 
     try {
         const pdfDoc = await PDFDocument.load(pdfBuffer);
-        const pages = pdfDoc.getPages();
-        const uint8Array = new Uint8Array(pdfBuffer);
+        const pdfPages = pdfDoc.getPages();
+        const pageIndexes = pages.map(buildPageIndex);
 
-        const pdfData = await pdfjsLib.getDocument({ data: uint8Array }).promise;
-
-        const seen = new Set();
+        const placed = [];
 
         for (const highlight of highlights) {
-            const positions = await findTextPositions(pdfData, highlight.text);
+            const match = findPhrase(pageIndexes, highlight.text);
 
-            const mergedPositions = mergePositions(positions);
+            if (!match) {
+                placed.push({ ...highlight, page: null });
+                continue;
+            }
 
-            for (const position of mergedPositions) {
-                const key = `${position.pageNum}-${position.x}-${position.y}`;
+            const rects = matchToRects(pages[match.pageNum], pageIndexes[match.pageNum].map, match);
+            const page = pdfPages[match.pageNum];
 
-                if (seen.has(key)) continue;
-                seen.add(key);
-
-                const page = pages[position.pageNum - 1];
-
+            for (const rect of rects) {
                 page.drawRectangle({
-                    x: position.x - 1,
-                    y: position.y - 2,
-                    width: Math.max(position.width + 2, 12),
-                    height: position.height * 0.8,
+                    x: rect.x - 1,
+                    y: rect.y - rect.height * 0.25,
+                    width: rect.width + 2,
+                    height: rect.height * 1.2,
                     color: colorMap[highlight.color] || colorMap.yellow,
                     opacity: 0.35,
                     borderWidth: 0,
                 });
             }
+
+            placed.push({ ...highlight, page: match.pageNum + 1 });
         }
 
         const highlightedPdfBytes = await pdfDoc.save();
-        return Buffer.from(highlightedPdfBytes);
+        return { buffer: Buffer.from(highlightedPdfBytes), highlights: placed };
 
     } catch (err) {
         throw new Error('PDF highlighting failed: ' + err.message);
     }
 };
 
-// EXTRACT TEXT (replaces pdf-parse, whose bundled pdf.js v1.10 fails on newer PDFs)
-const extractText = async (pdfBuffer) => {
-    const pdfData = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer) }).promise;
-
-    let text = '';
-    for (let pageNum = 1; pageNum <= pdfData.numPages; pageNum++) {
-        const page = await pdfData.getPage(pageNum);
-        const textContent = await page.getTextContent();
-
-        for (const item of textContent.items) {
-            text += item.str + (item.hasEOL ? '\n' : '');
-        }
-        text += '\n\n';
-    }
-
-    return text;
-};
-
-module.exports = { highlightPDFDoc, extractText };
+module.exports = { readPdf, extractText, highlightPDFDoc, normalizeText };
