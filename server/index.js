@@ -36,13 +36,17 @@ app.use(async (req, res, next) => {
     }
 });
 
+// auth route (mounted first, the routers below require a login for everything)
+const authRouter = require('./src/routes/auth');
+app.use('/api/auth', authRouter);
+
 // upload route
 const uploadRouter = require('./src/routes/upload');
 app.use('/api', uploadRouter);
 
-// auth route
-const authRouter = require('./src/routes/auth');
-app.use('/api/auth', authRouter);
+// history and saved documents
+const documentsRouter = require('./src/routes/documents');
+app.use('/api', documentsRouter);
 
 // start server (only when run directly, Vercel imports the app instead)
 if (require.main === module) {
