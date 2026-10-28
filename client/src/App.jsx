@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/auth';
 
@@ -16,10 +16,13 @@ function RequireAuth({ children }) {
   return token ? children : <Navigate to="/login" replace />;
 }
 
-// login and signup skip straight to the library when already signed in
+// login and signup skip straight to the library when already signed in.
+// Only the token at arrival counts: after logging in here the page navigates
+// itself, and reacting to the new token would race it to /dashboard
 function GuestOnly({ children }) {
   const { token } = useAuth();
-  return token ? <Navigate to="/dashboard" replace /> : children;
+  const [signedInOnArrival] = useState(Boolean(token));
+  return signedInOnArrival ? <Navigate to="/dashboard" replace /> : children;
 }
 
 function App() {
