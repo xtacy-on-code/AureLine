@@ -11,7 +11,7 @@ function Upload() {
     const [isDragging, setIsDragging] = useState(false);
     const [highlights, setHighlights] = useState([]);
 
-    const { token } = useAuth();
+    const { token, logout } = useAuth();
     const navigate = useNavigate();
     
     // Create a reference to target the hidden file picker input
@@ -77,6 +77,19 @@ function Upload() {
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
+
+            // token expired or invalid, send user back to login
+            if (res.status === 401) {
+                logout();
+                navigate('/login');
+                return;
+            }
+
+            // vercel rejects request bodies over ~4.5MB before they reach the server
+            if (res.status === 413) {
+                setError('PDF is too large. Please upload a file under 4 MB.');
+                return;
+            }
 
             const data = await res.json();
             if (!res.ok) {

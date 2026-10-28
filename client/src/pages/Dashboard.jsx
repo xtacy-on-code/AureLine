@@ -17,6 +17,8 @@ function Dashboard() {
                 const res = await fetch(`${API_URL}/api/history`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
+                // token expired or invalid, send user back to login
+                if (res.status === 401) { logout(); navigate('/login'); return; }
                 const data = await res.json();
                 if (!res.ok) { setError('Failed to fetch documents'); return; }
                 setDocuments(data.documents);
