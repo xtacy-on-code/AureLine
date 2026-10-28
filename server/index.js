@@ -12,6 +12,30 @@ app.get('/', (req, res) => {
     res.json({ message: 'AureLine API is running' });
 });
 
+// connect database (reused across requests on serverless)
+let dbConnection = null;
+const connectDB = () => {
+    if (!dbConnection) {
+        dbConnection = mongoose.connect(process.env.MONGODB_URI)
+            .then(() => console.log('MONGODB connected'))
+            .catch(err => {
+                dbConnection = null;
+                throw err;
+            });
+    }
+    return dbConnection;
+};
+
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        console.error('MONGODB error: ', err);
+        res.status(500).json({ error: 'Database connection failed' });
+    }
+});
+
 // upload route
 const uploadRouter = require('./src/routes/upload');
 app.use('/api', uploadRouter);
@@ -20,13 +44,12 @@ app.use('/api', uploadRouter);
 const authRouter = require('./src/routes/auth');
 app.use('/api/auth', authRouter);
 
-// connect database
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MONGODB connected'))
-    .catch(err => console.error('MONGODB error: ', err))
+// start server (only when run directly, Vercel imports the app instead)
+if (require.main === module) {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
-// start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+module.exports = app;
