@@ -218,6 +218,95 @@
   }
 }
 
+/* ---------- Comic pieces (landing page only) ---------- */
+.caption-box {
+  display: inline-block;
+  border: 2px solid var(--color-ink);
+  background: var(--color-mark-yellow);
+  padding: 0.15em 0.6em 0.2em;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transform: rotate(-1.5deg);
+}
+
+.bubble {
+  position: relative;
+  display: inline-block;
+  background: var(--color-paper-raised);
+  border: 2.5px solid var(--color-ink);
+  border-radius: 26px 22px 28px 20px / 22px 28px 20px 26px;
+  padding: 0.55em 0.95em 0.6em;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 1.35rem;
+  line-height: 1.15;
+  color: var(--color-ink);
+}
+
+/* tail: a rotated corner poking out of the bottom left */
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 1.6em;
+  bottom: -0.62em;
+  width: 1em;
+  height: 1em;
+  background: inherit;
+  border-right: 2.5px solid var(--color-ink);
+  border-bottom: 2.5px solid var(--color-ink);
+  transform: skewX(32deg) rotate(14deg);
+}
+
+.bubble[data-tail="right"]::after {
+  left: auto;
+  right: 1.6em;
+  transform: skewX(-32deg) rotate(-14deg) scaleX(-1);
+}
+
+/* sound effects pop in once, never loop */
+@keyframes sfx-pop {
+  from {
+    opacity: 0;
+    transform: rotate(var(--sfx-rotate, -8deg)) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(var(--sfx-rotate, -8deg)) scale(1);
+  }
+}
+
+.sfx {
+  display: inline-block;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-ink);
+  transform: rotate(var(--sfx-rotate, -8deg));
+}
+
+.sfx[data-play="true"] {
+  animation: sfx-pop 320ms var(--ease-pop) both;
+  animation-delay: var(--sfx-delay, 0ms);
+}
+
+.sfx[data-play="false"] {
+  opacity: 0;
+}
+
+/* scroll story: the scanner band travels from above the page to its bottom edge */
+@keyframes story-scan {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 /* ---------- Entrances ---------- */
 @keyframes rise-in {
   from {
@@ -253,6 +342,10 @@
   }
   .rise-in {
     animation: fade-in 200ms ease both;
+  }
+  .sfx[data-play] {
+    animation: none;
+    opacity: 1;
   }
   .pressable:active:not(:disabled),
   .press-ink:active:not(:disabled),
